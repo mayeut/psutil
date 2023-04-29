@@ -8,6 +8,7 @@ from __future__ import division
 
 import base64
 import collections
+import enum
 import errno
 import functools
 import glob
@@ -19,6 +20,7 @@ import sys
 import warnings
 from collections import defaultdict
 from collections import namedtuple
+from resource import prlimit
 
 from . import _common
 from . import _psposix
@@ -44,18 +46,6 @@ from ._common import parse_environ_block
 from ._common import path_exists_strict
 from ._common import supports_ipv6
 from ._common import usage_percent
-from ._compat import PY3
-from ._compat import FileNotFoundError
-from ._compat import PermissionError
-from ._compat import ProcessLookupError
-from ._compat import b
-from ._compat import basestring
-
-
-if PY3:
-    import enum
-else:
-    enum = None
 
 
 # fmt: off
@@ -102,29 +92,21 @@ LITTLE_ENDIAN = sys.byteorder == 'little'
 # * https://lkml.org/lkml/2015/8/17/234
 DISK_SECTOR_SIZE = 512
 
-if enum is None:
-    AF_LINK = socket.AF_PACKET
-else:
-    AddressFamily = enum.IntEnum(
-        'AddressFamily', {'AF_LINK': int(socket.AF_PACKET)}
-    )
-    AF_LINK = AddressFamily.AF_LINK
+AddressFamily = enum.IntEnum(
+    'AddressFamily', {'AF_LINK': int(socket.AF_PACKET)}
+)
+AF_LINK = AddressFamily.AF_LINK
+
 
 # ioprio_* constants http://linux.die.net/man/2/ioprio_get
-if enum is None:
+class IOPriority(enum.IntEnum):
     IOPRIO_CLASS_NONE = 0
     IOPRIO_CLASS_RT = 1
     IOPRIO_CLASS_BE = 2
     IOPRIO_CLASS_IDLE = 3
-else:
 
-    class IOPriority(enum.IntEnum):
-        IOPRIO_CLASS_NONE = 0
-        IOPRIO_CLASS_RT = 1
-        IOPRIO_CLASS_BE = 2
-        IOPRIO_CLASS_IDLE = 3
 
-    globals().update(IOPriority.__members__)
+globals().update(IOPriority.__members__)
 
 # See:
 # https://github.com/torvalds/linux/blame/master/fs/proc/array.c
@@ -211,7 +193,7 @@ pcputimes = namedtuple('pcputimes',
 
 def readlink(path):
     """Wrapper around os.readlink()."""
-    assert isinstance(path, basestring), path
+    assert isinstance(path, str), path
     path = os.readlink(path)
     # readlink() might return paths containing null bytes ('\x00')
     # resulting in "TypeError: must be encoded string without NULL
@@ -297,53 +279,9 @@ except Exception as err:  # noqa: BLE001
 # =====================================================================
 # --- prlimit
 # =====================================================================
-
-# Backport of resource.prlimit() for Python 2. Originally this was done
-# in C, but CentOS-6 which we use to create manylinux wheels is too old
-# and does not support prlimit() syscall. As such the resulting wheel
-# would not include prlimit(), even when installed on newer systems.
-# This is the only part of psutil using ctypes.
-
-prlimit = None
-try:
-    from resource import prlimit  # python >= 3.4
-except ImportError:
-    import ctypes
-
-    libc = ctypes.CDLL(None, use_errno=True)
-
-    if hasattr(libc, "prlimit"):
-
-        def prlimit(pid, resource_, limits=None):
-            class StructRlimit(ctypes.Structure):
-                _fields_ = [
-                    ('rlim_cur', ctypes.c_longlong),
-                    ('rlim_max', ctypes.c_longlong),
-                ]
-
-            current = StructRlimit()
-            if limits is None:
-                # get
-                ret = libc.prlimit(pid, resource_, None, ctypes.byref(current))
-            else:
-                # set
-                new = StructRlimit()
-                new.rlim_cur = limits[0]
-                new.rlim_max = limits[1]
-                ret = libc.prlimit(
-                    pid, resource_, ctypes.byref(new), ctypes.byref(current)
-                )
-
-            if ret != 0:
-                errno_ = ctypes.get_errno()
-                raise OSError(errno_, os.strerror(errno_))
-            return (current.rlim_cur, current.rlim_max)
-
-
-if prlimit is not None:
-    __extra__all__.extend(
-        [x for x in dir(cext) if x.startswith('RLIM') and x.isupper()]
-    )
+__extra__all__.extend(
+    [x for x in dir(cext) if x.startswith('RLIM') and x.isupper()]
+)
 
 
 # =====================================================================
@@ -915,8 +853,7 @@ class Connections:
         # no end-points connected
         if not port:
             return ()
-        if PY3:
-            ip = ip.encode('ascii')
+        ip = ip.encode('ascii')
         if family == socket.AF_INET:
             # see: https://github.com/giampaolo/psutil/issues/201
             if LITTLE_ENDIAN:
@@ -1652,7 +1589,8 @@ def boot_time():
 
 def pids():
     """Returns a list of PIDs currently running on the system."""
-    return [int(x) for x in os.listdir(b(get_procfs_path())) if x.isdigit()]
+    return [int(x) for x in os.listdir(get_procfs_path().encode("latin-1"))
+            if x.isdigit()]
 
 
 def pid_exists(pid):
@@ -1831,9 +1769,7 @@ class Process:
 
     @wrap_exceptions
     def name(self):
-        name = self._parse_stat_file()['name']
-        if PY3:
-            name = decode(name)
+        name = decode(self._parse_stat_file()['name'])
         # XXX - gets changed later and probably needs refactoring
         return name
 
@@ -2100,8 +2036,7 @@ class Process:
                 if not path:
                     path = '[anon]'
                 else:
-                    if PY3:
-                        path = decode(path)
+                    path = decode(path)
                     path = path.strip()
                     if path.endswith(' (deleted)') and not path_exists_strict(
                         path
@@ -2241,15 +2176,16 @@ class Process:
         @wrap_exceptions
         def ionice_get(self):
             ioclass, value = cext.proc_ioprio_get(self.pid)
-            if enum is not None:
-                ioclass = IOPriority(ioclass)
+            ioclass = IOPriority(ioclass)
             return _common.pionice(ioclass, value)
 
         @wrap_exceptions
         def ionice_set(self, ioclass, value):
             if value is None:
                 value = 0
-            if value and ioclass in (IOPRIO_CLASS_IDLE, IOPRIO_CLASS_NONE):
+            acceptable_classes = {IOPriority.IOPRIO_CLASS_IDLE,
+                                  IOPriority.IOPRIO_CLASS_NONE}
+            if value and ioclass in acceptable_classes:
                 raise ValueError("%r ioclass accepts no value" % ioclass)
             if value < 0 or value > 7:
                 msg = "value not in 0-7 range"
@@ -2288,9 +2224,7 @@ class Process:
 
     @wrap_exceptions
     def status(self):
-        letter = self._parse_stat_file()['status']
-        if PY3:
-            letter = letter.decode()
+        letter = self._parse_stat_file()['status'].decode()
         # XXX is '?' legit? (we're not supposed to return it anyway)
         return PROC_STATUSES.get(letter, '?')
 

@@ -33,10 +33,10 @@ giampaolo  24123   0.0   35.0M    7.0M        sleep  02:12  00:02  bash
 
 import datetime
 import time
+from shutil import get_terminal_size
 
 import psutil
 from psutil._common import bytes2human
-from psutil._compat import get_terminal_size
 
 
 def main():

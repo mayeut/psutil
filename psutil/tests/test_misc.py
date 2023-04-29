@@ -16,6 +16,8 @@ import pickle
 import socket
 import stat
 import unittest
+from contextlib import redirect_stderr
+from unittest import mock
 
 import psutil
 import psutil.tests
@@ -31,9 +33,6 @@ from psutil._common import memoize_when_activated
 from psutil._common import parse_environ_block
 from psutil._common import supports_ipv6
 from psutil._common import wrap_numbers
-from psutil._compat import PY3
-from psutil._compat import FileNotFoundError
-from psutil._compat import redirect_stderr
 from psutil.tests import APPVEYOR
 from psutil.tests import CI_TESTING
 from psutil.tests import HAS_BATTERY
@@ -46,7 +45,6 @@ from psutil.tests import PYTHON_EXE
 from psutil.tests import PYTHON_EXE_ENV
 from psutil.tests import SCRIPTS_DIR
 from psutil.tests import PsutilTestCase
-from psutil.tests import mock
 from psutil.tests import reload_module
 from psutil.tests import sh
 
@@ -570,10 +568,7 @@ class TestCommonModule(PsutilTestCase):
             assert not isfile_strict(this_file)
 
     def test_debug(self):
-        if PY3:
-            from io import StringIO
-        else:
-            from StringIO import StringIO
+        from io import StringIO
 
         with redirect_stderr(StringIO()) as f:
             debug("hello")
@@ -900,7 +895,7 @@ class TestScripts(PsutilTestCase):
     @staticmethod
     def assert_syntax(exe):
         exe = os.path.join(SCRIPTS_DIR, exe)
-        with open(exe, encoding="utf8") if PY3 else open(exe) as f:
+        with open(exe, encoding="utf8") as f:
             src = f.read()
         ast.parse(src)
 

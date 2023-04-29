@@ -44,7 +44,6 @@ import psutil
 from psutil._common import hilite
 from psutil._common import print_color
 from psutil._common import term_supports_colors
-from psutil._compat import super
 from psutil.tests import CI_TESTING
 from psutil.tests import import_module_by_path
 from psutil.tests import print_sysinfo

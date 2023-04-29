@@ -4,10 +4,10 @@
 
 """Routines common to all posix systems."""
 
+import enum
 import glob
 import os
 import signal
-import sys
 import time
 
 from ._common import MACOS
@@ -15,23 +15,10 @@ from ._common import TimeoutExpired
 from ._common import memoize
 from ._common import sdiskusage
 from ._common import usage_percent
-from ._compat import PY3
-from ._compat import ChildProcessError
-from ._compat import FileNotFoundError
-from ._compat import InterruptedError
-from ._compat import PermissionError
-from ._compat import ProcessLookupError
-from ._compat import unicode
 
 
 if MACOS:
     from . import _psutil_osx
-
-
-if PY3:
-    import enum
-else:
-    enum = None
 
 
 __all__ = ['pid_exists', 'wait_pid', 'disk_usage', 'get_terminal_map']
@@ -61,7 +48,7 @@ def pid_exists(pid):
 
 # Python 3.5 signals enum (contributed by me ^^):
 # https://bugs.python.org/issue21076
-if enum is not None and hasattr(signal, "Signals"):
+if hasattr(signal, "Signals"):
     Negsignal = enum.IntEnum(
         'Negsignal', dict([(x.name, -x.value) for x in signal.Signals])
     )
@@ -72,11 +59,6 @@ if enum is not None and hasattr(signal, "Signals"):
             return Negsignal(num)
         except ValueError:
             return num
-
-else:  # pragma: no cover
-
-    def negsig_to_enum(num):
-        return num
 
 
 def wait_pid(
@@ -181,23 +163,7 @@ def disk_usage(path):
     total and used disk space whereas "free" and "percent" represent
     the "free" and "used percent" user disk space.
     """
-    if PY3:
-        st = os.statvfs(path)
-    else:  # pragma: no cover
-        # os.statvfs() does not support unicode on Python 2:
-        # - https://github.com/giampaolo/psutil/issues/416
-        # - http://bugs.python.org/issue18695
-        try:
-            st = os.statvfs(path)
-        except UnicodeEncodeError:
-            if isinstance(path, unicode):
-                try:
-                    path = path.encode(sys.getfilesystemencoding())
-                except UnicodeEncodeError:
-                    pass
-                st = os.statvfs(path)
-            else:
-                raise
+    st = os.statvfs(path)
 
     # Total space which is only available to root (unless changed
     # at system level).

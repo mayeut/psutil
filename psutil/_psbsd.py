@@ -10,6 +10,7 @@ import functools
 import os
 from collections import defaultdict
 from collections import namedtuple
+from shutil import which
 from xml.etree import ElementTree
 
 from . import _common
@@ -28,10 +29,6 @@ from ._common import debug
 from ._common import memoize
 from ._common import memoize_when_activated
 from ._common import usage_percent
-from ._compat import FileNotFoundError
-from ._compat import PermissionError
-from ._compat import ProcessLookupError
-from ._compat import which
 
 
 __extra__all__ = []

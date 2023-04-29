@@ -116,14 +116,7 @@ struct module_state {
     PyObject *error;
 };
 
-#if PY_MAJOR_VERSION >= 3
 #define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
-#else
-#define GETSTATE(m) (&_state)
-static struct module_state _state;
-#endif
-
-#if PY_MAJOR_VERSION >= 3
 
 static int psutil_windows_traverse(PyObject *m, visitproc visit, void *arg) {
     Py_VISIT(GETSTATE(m)->error);
@@ -147,34 +140,23 @@ static struct PyModuleDef moduledef = {
     NULL
 };
 
-#define INITERROR return NULL
-
 PyMODINIT_FUNC PyInit__psutil_windows(void)
-
-#else
-#define INITERROR return
-void init_psutil_windows(void)
-#endif
 {
     struct module_state *st = NULL;
-#if PY_MAJOR_VERSION >= 3
     PyObject *module = PyModule_Create(&moduledef);
-#else
-    PyObject *module = Py_InitModule("_psutil_windows", PsutilMethods);
-#endif
     if (module == NULL)
-        INITERROR;
+        return NULL;
 
     if (psutil_setup() != 0)
-        INITERROR;
+        return NULL;
     if (psutil_set_se_debug() != 0)
-        INITERROR;
+        return NULL;
 
     st = GETSTATE(module);
     st->error = PyErr_NewException("_psutil_windows.Error", NULL, NULL);
     if (st->error == NULL) {
         Py_DECREF(module);
-        INITERROR;
+        return NULL;
     }
 
     // Exceptions.
@@ -279,7 +261,5 @@ void init_psutil_windows(void)
     PyModule_AddIntConstant(
         module, "WINDOWS_10", PSUTIL_WINDOWS_10);
 
-#if PY_MAJOR_VERSION >= 3
     return module;
-#endif
 }

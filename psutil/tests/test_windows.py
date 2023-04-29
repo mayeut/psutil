@@ -19,22 +19,19 @@ import sys
 import time
 import unittest
 import warnings
+from shutil import which
+from unittest import mock
 
 import psutil
 from psutil import WINDOWS
-from psutil._compat import FileNotFoundError
-from psutil._compat import super
-from psutil._compat import which
 from psutil.tests import APPVEYOR
 from psutil.tests import GITHUB_ACTIONS
 from psutil.tests import HAS_BATTERY
 from psutil.tests import IS_64BIT
-from psutil.tests import PY3
 from psutil.tests import PYPY
 from psutil.tests import TOLERANCE_DISK_USAGE
 from psutil.tests import TOLERANCE_SYS_MEM
 from psutil.tests import PsutilTestCase
-from psutil.tests import mock
 from psutil.tests import retry_on_failure
 from psutil.tests import sh
 from psutil.tests import spawn_testproc
@@ -58,8 +55,6 @@ cext = psutil._psplatform.cext
 
 @unittest.skipIf(not WINDOWS, "WINDOWS only")
 @unittest.skipIf(PYPY, "pywin32 not available on PYPY")
-# https://github.com/giampaolo/psutil/pull/1762#issuecomment-632892692
-@unittest.skipIf(GITHUB_ACTIONS and not PY3, "pywin32 broken on GITHUB + PY2")
 class WindowsTestCase(PsutilTestCase):
     pass
 
@@ -925,11 +920,7 @@ class TestServices(PsutilTestCase):
 
         # test NoSuchProcess
         service = psutil.win_service_get(name)
-        if PY3:
-            args = (0, "msg", 0, ERROR_SERVICE_DOES_NOT_EXIST)
-        else:
-            args = (ERROR_SERVICE_DOES_NOT_EXIST, "msg")
-        exc = WindowsError(*args)
+        exc = WindowsError(0, "msg", 0, ERROR_SERVICE_DOES_NOT_EXIST)
         with mock.patch(
             "psutil._psplatform.cext.winservice_query_status", side_effect=exc
         ):
@@ -940,11 +931,7 @@ class TestServices(PsutilTestCase):
             self.assertRaises(psutil.NoSuchProcess, service.username)
 
         # test AccessDenied
-        if PY3:
-            args = (0, "msg", 0, ERROR_ACCESS_DENIED)
-        else:
-            args = (ERROR_ACCESS_DENIED, "msg")
-        exc = WindowsError(*args)
+        exc = WindowsError(0, "msg", 0, ERROR_ACCESS_DENIED)
         with mock.patch(
             "psutil._psplatform.cext.winservice_query_status", side_effect=exc
         ):

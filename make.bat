@@ -10,8 +10,7 @@ rem   make install
 rem   make test
 rem
 rem This script is modeled after my Windows installation which uses:
-rem - Visual studio 2008 for Python 2.7
-rem - Visual studio 2010 for Python 3.4+
+rem - Visual studio 2015 for Python 3.6+
 rem ...therefore it might not work on your Windows installation.
 rem
 rem To compile for a specific Python version run:

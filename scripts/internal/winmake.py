@@ -31,7 +31,6 @@ APPVEYOR = bool(os.environ.get('APPVEYOR'))
 PYTHON = sys.executable if APPVEYOR else os.getenv('PYTHON', sys.executable)
 RUNNER_PY = 'psutil\\tests\\runner.py'
 GET_PIP_URL = "https://bootstrap.pypa.io/get-pip.py"
-PY3 = sys.version_info[0] >= 3
 HERE = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.realpath(os.path.join(HERE, "..", ".."))
 PYPY = '__pypy__' in sys.builtin_module_names
@@ -46,18 +45,12 @@ DEPS = [
     "wheel",
 ]
 
-if sys.version_info[0] < 3:
-    DEPS.append('mock')
-    DEPS.append('ipaddress')
-    DEPS.append('enum34')
-
 if not PYPY:
     DEPS.append("pywin32")
     DEPS.append("wmi")
 
 _cmds = {}
-if PY3:
-    basestring = str
+basestring = str
 
 GREEN = 2
 LIGHTBLUE = 3
@@ -220,14 +213,13 @@ def build():
     # order to allow "import psutil" when using the interactive interpreter
     # from within psutil root directory.
     cmd = [PYTHON, "setup.py", "build_ext", "-i"]
-    if sys.version_info[:2] >= (3, 6) and (os.cpu_count() or 1) > 1:
+    if (os.cpu_count() or 1) > 1:
         cmd += ['--parallel', str(os.cpu_count())]
     # Print coloured warnings in real time.
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     try:
         for line in iter(p.stdout.readline, b''):
-            if PY3:
-                line = line.decode()
+            line = line.decode()
             line = line.strip()
             if 'warning' in line:
                 win_colorprint(line, YELLOW)
@@ -266,10 +258,7 @@ def install_pip():
     try:
         sh('%s -c "import pip"' % PYTHON)
     except SystemExit:
-        if PY3:
-            from urllib.request import urlopen
-        else:
-            from urllib2 import urlopen
+        from urllib.request import urlopen
 
         if hasattr(ssl, '_create_unverified_context'):
             ctx = ssl._create_unverified_context()
@@ -373,6 +362,7 @@ def setup_dev_env():
     install_pip()
     install_git_hooks()
     sh("%s -m pip install -U %s" % (PYTHON, " ".join(DEPS)))
+
 
 
 def test(name=RUNNER_PY):
@@ -499,14 +489,6 @@ def print_api_speed():
     sh("%s -Wa scripts\\internal\\print_api_speed.py" % PYTHON)
 
 
-def download_appveyor_wheels():
-    """Download appveyor wheels."""
-    sh(
-        "%s -Wa scripts\\internal\\download_wheels_appveyor.py "
-        "--user giampaolo --project psutil" % PYTHON
-    )
-
-
 def generate_manifest():
     """Generate MANIFEST.in file."""
     script = "scripts\\internal\\generate_manifest.py"
@@ -549,7 +531,6 @@ def parse_args():
     sp.add_parser('build', help="build")
     sp.add_parser('clean', help="deletes dev files")
     sp.add_parser('coverage', help="run coverage tests.")
-    sp.add_parser('download-appveyor-wheels', help="download wheels.")
     sp.add_parser('generate-manifest', help="generate MANIFEST.in file")
     sp.add_parser('help', help="print this help")
     sp.add_parser('install', help="build + install in develop/edit mode")

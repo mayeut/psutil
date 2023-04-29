@@ -8,6 +8,7 @@
 
 import contextlib
 import datetime
+import enum
 import errno
 import os
 import platform
@@ -18,6 +19,7 @@ import socket
 import sys
 import time
 import unittest
+from unittest import mock
 
 import psutil
 from psutil import AIX
@@ -30,9 +32,6 @@ from psutil import OPENBSD
 from psutil import POSIX
 from psutil import SUNOS
 from psutil import WINDOWS
-from psutil._compat import PY3
-from psutil._compat import FileNotFoundError
-from psutil._compat import long
 from psutil.tests import ASCII_FS
 from psutil.tests import CI_TESTING
 from psutil.tests import DEVNULL
@@ -51,8 +50,6 @@ from psutil.tests import PYPY
 from psutil.tests import UNICODE_SUFFIX
 from psutil.tests import PsutilTestCase
 from psutil.tests import check_net_address
-from psutil.tests import enum
-from psutil.tests import mock
 from psutil.tests import retry_on_failure
 
 
@@ -310,7 +307,7 @@ class TestMemoryAPIs(PsutilTestCase):
         for name in mem._fields:
             value = getattr(mem, name)
             if name != 'percent':
-                self.assertIsInstance(value, (int, long))
+                self.assertIsInstance(value, int)
             if name != 'total':
                 if not value >= 0:
                     raise self.fail("%r < 0 (%s)" % (name, value))
@@ -574,7 +571,7 @@ class TestCpuAPIs(PsutilTestCase):
                     self.assertLessEqual(nt.current, nt.max)
                 for name in nt._fields:
                     value = getattr(nt, name)
-                    self.assertIsInstance(value, (int, long, float))
+                    self.assertIsInstance(value, (int, float))
                     self.assertGreaterEqual(value, 0)
 
         ls = psutil.cpu_freq(percpu=True)
@@ -809,7 +806,7 @@ class TestNetAPIs(PsutilTestCase):
                 self.assertIsInstance(addr.netmask, (str, type(None)))
                 self.assertIsInstance(addr.broadcast, (str, type(None)))
                 self.assertIn(addr.family, families)
-                if PY3 and not PYPY:
+                if not PYPY:
                     self.assertIsInstance(addr.family, enum.IntEnum)
                 if nic_stats[nic].isup:
                     # Do not test binding to addresses of interfaces
@@ -957,7 +954,7 @@ class TestSensorsAPIs(PsutilTestCase):
             self.assertIsInstance(name, str)
             for entry in entries:
                 self.assertIsInstance(entry.label, str)
-                self.assertIsInstance(entry.current, (int, long))
+                self.assertIsInstance(entry.current, int)
                 self.assertGreaterEqual(entry.current, 0)
 
 

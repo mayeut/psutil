@@ -28,11 +28,6 @@ from ._common import memoize_when_activated
 from ._common import sockfam_to_enum
 from ._common import socktype_to_enum
 from ._common import usage_percent
-from ._compat import PY3
-from ._compat import FileNotFoundError
-from ._compat import PermissionError
-from ._compat import ProcessLookupError
-from ._compat import b
 
 
 __extra__all__ = ["CONN_IDLE", "CONN_BOUND", "PROCFS_PATH"]
@@ -154,8 +149,7 @@ def swap_memory():
         stdout=subprocess.PIPE,
     )
     stdout, _ = p.communicate()
-    if PY3:
-        stdout = stdout.decode(sys.stdout.encoding)
+    stdout = stdout.decode(sys.stdout.encoding)
     if p.returncode != 0:
         raise RuntimeError("'swap -l' failed (retcode=%s)" % p.returncode)
 
@@ -349,7 +343,8 @@ def users():
 
 def pids():
     """Returns a list of PIDs currently running on the system."""
-    return [int(x) for x in os.listdir(b(get_procfs_path())) if x.isdigit()]
+    return [int(x) for x in os.listdir(get_procfs_path().encode("latin-1"))
+            if x.isdigit()]
 
 
 def pid_exists(pid):
@@ -643,10 +638,9 @@ class Process:
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         stdout, stderr = p.communicate()
-        if PY3:
-            stdout, stderr = (
-                x.decode(sys.stdout.encoding) for x in (stdout, stderr)
-            )
+        stdout, stderr = (
+            x.decode(sys.stdout.encoding) for x in (stdout, stderr)
+        )
         if p.returncode != 0:
             if 'permission denied' in stderr.lower():
                 raise AccessDenied(self.pid, self._name)

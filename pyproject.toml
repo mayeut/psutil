@@ -118,7 +118,6 @@ lines-after-imports = 2
 
 [tool.coverage.report]
 exclude_lines = [
-    "enum.IntEnum",
     "except ImportError:",
     "globals().update",
     "if BSD",
@@ -128,7 +127,6 @@ exclude_lines = [
     "if MACOS",
     "if NETBSD",
     "if OPENBSD",
-    "if PY3:",
     "if SUNOS",
     "if WINDOWS",
     "if _WINDOWS:",

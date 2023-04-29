@@ -23,7 +23,6 @@ from psutil import OPENBSD
 from psutil import POSIX
 from psutil import SUNOS
 from psutil import WINDOWS
-from psutil._compat import long
 from psutil.tests import GITHUB_ACTIONS
 from psutil.tests import HAS_CPU_FREQ
 from psutil.tests import HAS_NET_IO_COUNTERS
@@ -33,7 +32,6 @@ from psutil.tests import PYPY
 from psutil.tests import SKIP_SYSCONS
 from psutil.tests import PsutilTestCase
 from psutil.tests import create_sockets
-from psutil.tests import enum
 from psutil.tests import is_namedtuple
 from psutil.tests import kernel_version
 
@@ -240,13 +238,13 @@ class TestSystemAPITypes(PsutilTestCase):
     def test_cpu_freq(self):
         if psutil.cpu_freq() is None:
             raise self.skipTest("cpu_freq() returns None")
-        self.assert_ntuple_of_nums(psutil.cpu_freq(), type_=(float, int, long))
+        self.assert_ntuple_of_nums(psutil.cpu_freq(), type_=(float, int))
 
     def test_disk_io_counters(self):
         # Duplicate of test_system.py. Keep it anyway.
         for k, v in psutil.disk_io_counters(perdisk=True).items():
             self.assertIsInstance(k, str)
-            self.assert_ntuple_of_nums(v, type_=(int, long))
+            self.assert_ntuple_of_nums(v, type_=(int,))
 
     def test_disk_partitions(self):
         # Duplicate of test_system.py. Keep it anyway.
@@ -271,7 +269,7 @@ class TestSystemAPITypes(PsutilTestCase):
         for ifname, addrs in psutil.net_if_addrs().items():
             self.assertIsInstance(ifname, str)
             for addr in addrs:
-                if enum is not None and not PYPY:
+                if not PYPY:
                     self.assertIsInstance(addr.family, enum.IntEnum)
                 else:
                     self.assertIsInstance(addr.family, int)
@@ -284,10 +282,7 @@ class TestSystemAPITypes(PsutilTestCase):
         for ifname, info in psutil.net_if_stats().items():
             self.assertIsInstance(ifname, str)
             self.assertIsInstance(info.isup, bool)
-            if enum is not None:
-                self.assertIsInstance(info.duplex, enum.IntEnum)
-            else:
-                self.assertIsInstance(info.duplex, int)
+            self.assertIsInstance(info.duplex, enum.IntEnum)
             self.assertIsInstance(info.speed, int)
             self.assertIsInstance(info.mtu, int)
 
@@ -337,10 +332,7 @@ class TestProcessWaitType(PsutilTestCase):
         p.terminate()
         code = p.wait()
         self.assertEqual(code, -signal.SIGTERM)
-        if enum is not None:
-            self.assertIsInstance(code, enum.IntEnum)
-        else:
-            self.assertIsInstance(code, int)
+        self.assertIsInstance(code, enum.IntEnum)
 
 
 if __name__ == '__main__':

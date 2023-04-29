@@ -21,6 +21,7 @@ import subprocess
 import sys
 import tempfile
 import warnings
+from shutil import which
 
 
 with warnings.catch_warnings():
@@ -56,14 +57,11 @@ from _common import POSIX  # NOQA
 from _common import SUNOS  # NOQA
 from _common import WINDOWS  # NOQA
 from _common import hilite  # NOQA
-from _compat import PY3  # NOQA
-from _compat import which  # NOQA
 
 
 PYPY = '__pypy__' in sys.builtin_module_names
-PY36_PLUS = sys.version_info[:2] >= (3, 6)
 PY37_PLUS = sys.version_info[:2] >= (3, 7)
-CP36_PLUS = PY36_PLUS and sys.implementation.name == "cpython"
+CP36_PLUS = sys.implementation.name == "cpython"
 CP37_PLUS = PY37_PLUS and sys.implementation.name == "cpython"
 
 macros = []
@@ -72,7 +70,7 @@ if POSIX:
 if BSD:
     macros.append(("PSUTIL_BSD", 1))
 
-# Needed to determine _Py_PARSE_PID in case it's missing (Python 2, PyPy).
+# Needed to determine _Py_PARSE_PID in case it's missing (PyPy).
 # Taken from Lib/test/test_fcntl.py.
 # XXX: not bullet proof as the (long long) case is missing.
 if struct.calcsize('l') <= 8:
@@ -86,13 +84,7 @@ if POSIX:
     sources.append('psutil/_psutil_posix.c')
 
 
-extras_require = {
-    "test": [
-        "enum34; python_version <= '3.4'",
-        "ipaddress; python_version < '3.0'",
-        "mock; python_version < '3.0'",
-    ]
-}
+extras_require = {}
 if not PYPY:
     extras_require['test'].extend(
         ["pywin32; sys.platform == 'win32'", "wmi; sys.platform == 'win32'"]
@@ -486,8 +478,6 @@ def main():
             'Operating System :: POSIX :: SunOS/Solaris',
             'Operating System :: POSIX',
             'Programming Language :: C',
-            'Programming Language :: Python :: 2',
-            'Programming Language :: Python :: 2.7',
             'Programming Language :: Python :: 3',
             'Programming Language :: Python :: Implementation :: CPython',
             'Programming Language :: Python :: Implementation :: PyPy',
@@ -508,9 +498,7 @@ def main():
     )
     if setuptools is not None:
         kwargs.update(
-            python_requires=(
-                ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
-            ),
+            python_requires=">=3.6",
             extras_require=extras_require,
             zip_safe=False,
         )
@@ -527,19 +515,16 @@ def main():
                 ("build", "install", "sdist", "bdist", "develop")
             )
         ):
-            py3 = "3" if PY3 else ""
             if LINUX:
-                pyimpl = "pypy" if PYPY else "python"
+                pyimpl = "pypy3" if PYPY else "python3"
                 if which('dpkg'):
-                    missdeps(
-                        "sudo apt-get install gcc %s%s-dev" % (pyimpl, py3)
-                    )
+                    missdeps("sudo apt-get install gcc %s-dev" % pyimpl)
                 elif which('rpm'):
-                    missdeps("sudo yum install gcc %s%s-devel" % (pyimpl, py3))
+                    missdeps("sudo yum install gcc %s-devel" % pyimpl)
                 elif which('apk'):
                     missdeps(
-                        "sudo apk add gcc %s%s-dev musl-dev linux-headers"
-                        % (pyimpl, py3)
+                        "sudo apk add gcc %s-dev musl-dev linux-headers"
+                        % pyimpl
                     )
             elif MACOS:
                 msg = (
@@ -549,13 +534,13 @@ def main():
                 print(hilite(msg, color="red"), file=sys.stderr)
             elif FREEBSD:
                 if which('pkg'):
-                    missdeps("pkg install gcc python%s" % py3)
-                elif which('mport'):  # MidnightBSD
-                    missdeps("mport install gcc python%s" % py3)
+                    missdeps("pkg install gcc python3")
+                elif which('mport'):   # MidnightBSD
+                    missdeps("mport install gcc python3")
             elif OPENBSD:
-                missdeps("pkg_add -v gcc python%s" % py3)
+                missdeps("pkg_add -v gcc python3")
             elif NETBSD:
-                missdeps("pkgin install gcc python%s" % py3)
+                missdeps("pkgin install gcc python3")
             elif SUNOS:
                 missdeps(
                     "sudo ln -s /usr/bin/gcc /usr/local/bin/cc && "

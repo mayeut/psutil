@@ -1671,13 +1671,7 @@ struct module_state {
     PyObject *error;
 };
 
-#if PY_MAJOR_VERSION >= 3
 #define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
-#else
-#define GETSTATE(m) (&_state)
-#endif
-
-#if PY_MAJOR_VERSION >= 3
 
 static int
 psutil_sunos_traverse(PyObject *m, visitproc visit, void *arg) {
@@ -1703,26 +1697,14 @@ static struct PyModuleDef moduledef = {
     NULL
 };
 
-#define INITERROR return NULL
-
 PyMODINIT_FUNC PyInit__psutil_sunos(void)
-
-#else
-#define INITERROR return
-
-void init_psutil_sunos(void)
-#endif
 {
-#if PY_MAJOR_VERSION >= 3
     PyObject *module = PyModule_Create(&moduledef);
-#else
-    PyObject *module = Py_InitModule("_psutil_sunos", PsutilMethods);
-#endif
     if (module == NULL)
-        INITERROR;
+        return NULL;
 
     if (psutil_setup() != 0)
-        INITERROR;
+        return NULL;
 
     PyModule_AddIntConstant(module, "version", PSUTIL_VERSION);
 
@@ -1760,9 +1742,5 @@ void init_psutil_sunos(void)
     PyModule_AddIntConstant(module, "TCPS_BOUND", TCPS_BOUND);
     PyModule_AddIntConstant(module, "PSUTIL_CONN_NONE", PSUTIL_CONN_NONE);
 
-    if (module == NULL)
-        INITERROR;
-#if PY_MAJOR_VERSION >= 3
     return module;
-#endif
 }

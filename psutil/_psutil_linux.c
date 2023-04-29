@@ -47,47 +47,30 @@ static PyMethodDef mod_methods[] = {
     #define DUPLEX_UNKNOWN 0xff
 #endif
 
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "_psutil_linux",
+    NULL,
+    -1,
+    mod_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
 
-#if PY_MAJOR_VERSION >= 3
-    #define INITERR return NULL
-
-    static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "_psutil_linux",
-        NULL,
-        -1,
-        mod_methods,
-        NULL,
-        NULL,
-        NULL,
-        NULL
-    };
-
-    PyObject *PyInit__psutil_linux(void)
-#else  /* PY_MAJOR_VERSION */
-    #define INITERR return
-
-    void init_psutil_linux(void)
-#endif  /* PY_MAJOR_VERSION */
+PyObject *PyInit__psutil_linux(void)
 {
-#if PY_MAJOR_VERSION >= 3
     PyObject *mod = PyModule_Create(&moduledef);
-#else
-    PyObject *mod = Py_InitModule("_psutil_linux", mod_methods);
-#endif
     if (mod == NULL)
-        INITERR;
+        return NULL;
 
-    if (PyModule_AddIntConstant(mod, "version", PSUTIL_VERSION)) INITERR;
-    if (PyModule_AddIntConstant(mod, "DUPLEX_HALF", DUPLEX_HALF)) INITERR;
-    if (PyModule_AddIntConstant(mod, "DUPLEX_FULL", DUPLEX_FULL)) INITERR;
-    if (PyModule_AddIntConstant(mod, "DUPLEX_UNKNOWN", DUPLEX_UNKNOWN)) INITERR;
+    if (PyModule_AddIntConstant(mod, "version", PSUTIL_VERSION)) return NULL;
+    if (PyModule_AddIntConstant(mod, "DUPLEX_HALF", DUPLEX_HALF)) return NULL;
+    if (PyModule_AddIntConstant(mod, "DUPLEX_FULL", DUPLEX_FULL)) return NULL;
+    if (PyModule_AddIntConstant(mod, "DUPLEX_UNKNOWN", DUPLEX_UNKNOWN)) return NULL;
 
     psutil_setup();
 
-    if (mod == NULL)
-        INITERR;
-#if PY_MAJOR_VERSION >= 3
     return mod;
-#endif
 }

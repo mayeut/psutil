@@ -95,7 +95,7 @@ Troubleshooting
 Install pip
 -----------
 
-Pip is shipped by default with Python 2.7.9+ and 3.4+.
+Pip is shipped by default with Python 3.6+.
 If you don't have pip you can install with wget::
 
     wget https://bootstrap.pypa.io/get-pip.py -O - | python3

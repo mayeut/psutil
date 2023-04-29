@@ -17,7 +17,7 @@ sensors) in Python. Supported platforms:
  - Sun Solaris
  - AIX
 
-Works with Python versions 2.7 and 3.6+.
+Works with Python versions 3.6+.
 """
 
 from __future__ import division
@@ -87,11 +87,6 @@ from ._common import TimeoutExpired
 from ._common import ZombieProcess
 from ._common import memoize_when_activated
 from ._common import wrap_numbers as _wrap_numbers
-from ._compat import PY3 as _PY3
-from ._compat import PermissionError
-from ._compat import ProcessLookupError
-from ._compat import SubprocessTimeoutExpired as _SubprocessTimeoutExpired
-from ._compat import long
 
 
 if LINUX:
@@ -326,9 +321,6 @@ class Process(object):  # noqa: UP004
         if pid is None:
             pid = os.getpid()
         else:
-            if not _PY3 and not isinstance(pid, (int, long)):
-                msg = "pid must be an integer (got %r)" % pid
-                raise TypeError(msg)
             if pid < 0:
                 msg = "pid must be a positive integer (got %s)" % pid
                 raise ValueError(msg)
@@ -1576,7 +1568,7 @@ def wait_procs(procs, timeout=None, callback=None):
             returncode = proc.wait(timeout=timeout)
         except TimeoutExpired:
             pass
-        except _SubprocessTimeoutExpired:
+        except subprocess.SubprocessTimeoutExpired:
             pass
         else:
             if returncode is not None or not proc.is_running():
@@ -2229,27 +2221,25 @@ def net_if_addrs():
     Note: you can have more than one address of the same family
     associated with each interface.
     """
-    has_enums = _PY3
-    if has_enums:
-        import socket
+    import socket
     rawlist = _psplatform.net_if_addrs()
     rawlist.sort(key=lambda x: x[1])  # sort by family
     ret = collections.defaultdict(list)
     for name, fam, addr, mask, broadcast, ptp in rawlist:
-        if has_enums:
-            try:
-                fam = socket.AddressFamily(fam)
-            except ValueError:
-                if WINDOWS and fam == -1:
-                    fam = _psplatform.AF_LINK
-                elif (
-                    hasattr(_psplatform, "AF_LINK")
-                    and fam == _psplatform.AF_LINK
-                ):
-                    # Linux defines AF_LINK as an alias for AF_PACKET.
-                    # We re-set the family here so that repr(family)
-                    # will show AF_LINK rather than AF_PACKET
-                    fam = _psplatform.AF_LINK
+        try:
+            fam = socket.AddressFamily(fam)
+        except ValueError:
+            if WINDOWS and fam == -1:
+                fam = _psplatform.AF_LINK
+            elif (
+                hasattr(_psplatform, "AF_LINK")
+                and fam == _psplatform.AF_LINK
+            ):
+                # Linux defines AF_LINK as an alias for AF_PACKET.
+                # We re-set the family here so that repr(family)
+                # will show AF_LINK rather than AF_PACKET
+                fam = _psplatform.AF_LINK
+
         if fam == _psplatform.AF_LINK:
             # The underlying C function may return an incomplete MAC
             # address in which case we fill it with null bytes, see:
@@ -2411,8 +2401,9 @@ def _set_debug(value):
 
 
 def test():  # pragma: no cover
+    from shutil import get_terminal_size
+
     from ._common import bytes2human
-    from ._compat import get_terminal_size
 
     today_day = datetime.date.today()
     # fmt: off
@@ -2485,8 +2476,7 @@ def test():  # pragma: no cover
 
 
 del memoize_when_activated, division
-if sys.version_info[0] < 3:
-    del num, x  # noqa
+
 
 if __name__ == "__main__":
     test()

@@ -61,82 +61,65 @@ static PyMethodDef mod_methods[] = {
 };
 
 
-#if PY_MAJOR_VERSION >= 3
-    #define INITERR return NULL
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "_psutil_osx",
+    NULL,
+    -1,
+    mod_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
 
-    static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "_psutil_osx",
-        NULL,
-        -1,
-        mod_methods,
-        NULL,
-        NULL,
-        NULL,
-        NULL
-    };
-
-    PyObject *PyInit__psutil_osx(void)
-#else  /* PY_MAJOR_VERSION */
-    #define INITERR return
-
-    void init_psutil_osx(void)
-#endif  /* PY_MAJOR_VERSION */
+PyObject *PyInit__psutil_osx(void)
 {
-#if PY_MAJOR_VERSION >= 3
     PyObject *mod = PyModule_Create(&moduledef);
-#else
-    PyObject *mod = Py_InitModule("_psutil_osx", mod_methods);
-#endif
     if (mod == NULL)
-        INITERR;
+        return NULL;
 
     if (psutil_setup() != 0)
-        INITERR;
+        return NULL;
 
     if (PyModule_AddIntConstant(mod, "version", PSUTIL_VERSION))
-        INITERR;
+        return NULL;
     // process status constants, defined in:
     // http://fxr.watson.org/fxr/source/bsd/sys/proc.h?v=xnu-792.6.70#L149
     if (PyModule_AddIntConstant(mod, "SIDL", SIDL))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "SRUN", SRUN))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "SSLEEP", SSLEEP))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "SSTOP", SSTOP))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "SZOMB", SZOMB))
-        INITERR;
+        return NULL;
     // connection status constants
     if (PyModule_AddIntConstant(mod, "TCPS_CLOSED", TCPS_CLOSED))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_CLOSING", TCPS_CLOSING))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_CLOSE_WAIT", TCPS_CLOSE_WAIT))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_LISTEN", TCPS_LISTEN))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_ESTABLISHED", TCPS_ESTABLISHED))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_SYN_SENT", TCPS_SYN_SENT))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_SYN_RECEIVED", TCPS_SYN_RECEIVED))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_FIN_WAIT_1", TCPS_FIN_WAIT_1))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_FIN_WAIT_2", TCPS_FIN_WAIT_2))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_LAST_ACK", TCPS_LAST_ACK))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_TIME_WAIT", TCPS_TIME_WAIT))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "PSUTIL_CONN_NONE", PSUTIL_CONN_NONE))
-        INITERR;
-
-    if (mod == NULL)
-        INITERR;
-#if PY_MAJOR_VERSION >= 3
+        return NULL;
     return mod;
-#endif
 }

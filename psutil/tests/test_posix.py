@@ -14,6 +14,7 @@ import re
 import subprocess
 import time
 import unittest
+from unittest import mock
 
 import psutil
 from psutil import AIX
@@ -26,7 +27,6 @@ from psutil import SUNOS
 from psutil.tests import HAS_NET_IO_COUNTERS
 from psutil.tests import PYTHON_EXE
 from psutil.tests import PsutilTestCase
-from psutil.tests import mock
 from psutil.tests import retry_on_failure
 from psutil.tests import sh
 from psutil.tests import skip_on_access_denied

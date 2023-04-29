@@ -112,101 +112,86 @@ static PyMethodDef mod_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-#if PY_MAJOR_VERSION >= 3
-    #define INITERR return NULL
 
-    static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "_psutil_bsd",
-        NULL,
-        -1,
-        mod_methods,
-        NULL,
-        NULL,
-        NULL,
-        NULL
-    };
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "_psutil_bsd",
+    NULL,
+    -1,
+    mod_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
 
-    PyObject *PyInit__psutil_bsd(void)
-#else  /* PY_MAJOR_VERSION */
-    #define INITERR return
-
-    void init_psutil_bsd(void)
-#endif  /* PY_MAJOR_VERSION */
+PyObject *PyInit__psutil_bsd(void)
 {
     PyObject *v;
-#if PY_MAJOR_VERSION >= 3
     PyObject *mod = PyModule_Create(&moduledef);
-#else
-    PyObject *mod = Py_InitModule("_psutil_bsd", mod_methods);
-#endif
     if (mod == NULL)
-        INITERR;
+        return NULL;
 
-    if (PyModule_AddIntConstant(mod, "version", PSUTIL_VERSION)) INITERR;
+    if (PyModule_AddIntConstant(mod, "version", PSUTIL_VERSION)) return NULL;
     // process status constants
 
 #ifdef PSUTIL_FREEBSD
-    if (PyModule_AddIntConstant(mod, "SIDL", SIDL)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SRUN", SRUN)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SSLEEP", SSLEEP)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SSTOP", SSTOP)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SZOMB", SZOMB)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SWAIT", SWAIT)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SLOCK", SLOCK)) INITERR;
+    if (PyModule_AddIntConstant(mod, "SIDL", SIDL)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SRUN", SRUN)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SSLEEP", SSLEEP)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SSTOP", SSTOP)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SZOMB", SZOMB)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SWAIT", SWAIT)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SLOCK", SLOCK)) return NULL;
 #elif  PSUTIL_OPENBSD
-    if (PyModule_AddIntConstant(mod, "SIDL", SIDL)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SRUN", SRUN)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SSLEEP", SSLEEP)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SSTOP", SSTOP)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SZOMB", SZOMB)) INITERR; // unused
-    if (PyModule_AddIntConstant(mod, "SDEAD", SDEAD)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SONPROC", SONPROC)) INITERR;
+    if (PyModule_AddIntConstant(mod, "SIDL", SIDL)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SRUN", SRUN)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SSLEEP", SSLEEP)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SSTOP", SSTOP)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SZOMB", SZOMB)) return NULL; // unused
+    if (PyModule_AddIntConstant(mod, "SDEAD", SDEAD)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SONPROC", SONPROC)) return NULL;
 #elif defined(PSUTIL_NETBSD)
-    if (PyModule_AddIntConstant(mod, "SIDL", LSIDL)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SRUN", LSRUN)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SSLEEP", LSSLEEP)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SSTOP", LSSTOP)) INITERR;
-    if (PyModule_AddIntConstant(mod, "SZOMB", LSZOMB)) INITERR;
+    if (PyModule_AddIntConstant(mod, "SIDL", LSIDL)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SRUN", LSRUN)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SSLEEP", LSSLEEP)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SSTOP", LSSTOP)) return NULL;
+    if (PyModule_AddIntConstant(mod, "SZOMB", LSZOMB)) return NULL;
 #if __NetBSD_Version__ < 500000000
-    if (PyModule_AddIntConstant(mod, "SDEAD", LSDEAD)) INITERR;
+    if (PyModule_AddIntConstant(mod, "SDEAD", LSDEAD)) return NULL;
 #endif
-    if (PyModule_AddIntConstant(mod, "SONPROC", LSONPROC)) INITERR;
+    if (PyModule_AddIntConstant(mod, "SONPROC", LSONPROC)) return NULL;
     // unique to NetBSD
-    if (PyModule_AddIntConstant(mod, "SSUSPENDED", LSSUSPENDED)) INITERR;
+    if (PyModule_AddIntConstant(mod, "SSUSPENDED", LSSUSPENDED)) return NULL;
 #endif
 
     // connection status constants
     if (PyModule_AddIntConstant(mod, "TCPS_CLOSED", TCPS_CLOSED))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_CLOSING", TCPS_CLOSING))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_CLOSE_WAIT", TCPS_CLOSE_WAIT))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_LISTEN", TCPS_LISTEN))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_ESTABLISHED", TCPS_ESTABLISHED))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_SYN_SENT", TCPS_SYN_SENT))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_SYN_RECEIVED", TCPS_SYN_RECEIVED))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_FIN_WAIT_1", TCPS_FIN_WAIT_1))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_FIN_WAIT_2", TCPS_FIN_WAIT_2))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_LAST_ACK", TCPS_LAST_ACK))
-        INITERR;
+        return NULL;
     if (PyModule_AddIntConstant(mod, "TCPS_TIME_WAIT", TCPS_TIME_WAIT))
-        INITERR;
+        return NULL;
     // PSUTIL_CONN_NONE
-    if (PyModule_AddIntConstant(mod, "PSUTIL_CONN_NONE", 128)) INITERR;
+    if (PyModule_AddIntConstant(mod, "PSUTIL_CONN_NONE", 128)) return NULL;
 
     psutil_setup();
 
-    if (mod == NULL)
-        INITERR;
-#if PY_MAJOR_VERSION >= 3
     return mod;
-#endif
 }

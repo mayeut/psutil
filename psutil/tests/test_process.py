@@ -20,6 +20,7 @@ import textwrap
 import time
 import types
 import unittest
+from unittest import mock
 
 import psutil
 from psutil import AIX
@@ -33,10 +34,6 @@ from psutil import POSIX
 from psutil import SUNOS
 from psutil import WINDOWS
 from psutil._common import open_text
-from psutil._compat import PY3
-from psutil._compat import FileNotFoundError
-from psutil._compat import long
-from psutil._compat import super
 from psutil.tests import APPVEYOR
 from psutil.tests import CI_TESTING
 from psutil.tests import GITHUB_ACTIONS
@@ -332,10 +329,7 @@ class TestProcess(PsutilTestCase):
         # test writes
         io1 = p.io_counters()
         with open(self.get_testfn(), 'wb') as f:
-            if PY3:
-                f.write(bytes("x" * 1000000, 'ascii'))
-            else:
-                f.write("x" * 1000000)
+            f.write(bytes("x" * 1000000, 'ascii'))
         io2 = p.io_counters()
         self.assertGreaterEqual(io2.write_count, io1.write_count)
         self.assertGreaterEqual(io2.write_bytes, io1.write_bytes)
@@ -477,9 +471,7 @@ class TestProcess(PsutilTestCase):
             with self.assertRaises(IOError) as exc:
                 with open(testfn, "wb") as f:
                     f.write(b"X" * 1025)
-            self.assertEqual(
-                exc.exception.errno if PY3 else exc.exception[0], errno.EFBIG
-            )
+            self.assertEqual(exc.exception.errno, errno.EFBIG)
         finally:
             p.rlimit(psutil.RLIMIT_FSIZE, (soft, hard))
             self.assertEqual(p.rlimit(psutil.RLIMIT_FSIZE), (soft, hard))
@@ -665,7 +657,7 @@ class TestProcess(PsutilTestCase):
                 if fname in ('addr', 'perms'):
                     assert value, value
                 else:
-                    self.assertIsInstance(value, (int, long))
+                    self.assertIsInstance(value, int)
                     assert value >= 0, value
 
     @unittest.skipIf(not HAS_MEMORY_MAPS, "not supported")

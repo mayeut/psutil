@@ -12,6 +12,7 @@ from __future__ import print_function
 
 import collections
 import contextlib
+import enum
 import errno
 import functools
 import os
@@ -34,14 +35,6 @@ try:
     from socket import AF_UNIX
 except ImportError:
     AF_UNIX = None
-
-
-# can't take it from _common.py as this script is imported by setup.py
-PY3 = sys.version_info[0] >= 3
-if PY3:
-    import enum
-else:
-    enum = None
 
 
 PSUTIL_DEBUG = bool(os.getenv('PSUTIL_DEBUG'))
@@ -134,42 +127,31 @@ CONN_LISTEN = "LISTEN"
 CONN_CLOSING = "CLOSING"
 CONN_NONE = "NONE"
 
+
 # net_if_stats()
-if enum is None:
+class NicDuplex(enum.IntEnum):
     NIC_DUPLEX_FULL = 2
     NIC_DUPLEX_HALF = 1
     NIC_DUPLEX_UNKNOWN = 0
-else:
 
-    class NicDuplex(enum.IntEnum):
-        NIC_DUPLEX_FULL = 2
-        NIC_DUPLEX_HALF = 1
-        NIC_DUPLEX_UNKNOWN = 0
 
-    globals().update(NicDuplex.__members__)
+NIC_DUPLEX_FULL = NicDuplex.NIC_DUPLEX_FULL
+NIC_DUPLEX_HALF = NicDuplex.NIC_DUPLEX_HALF
+NIC_DUPLEX_UNKNOWN = NicDuplex.NIC_DUPLEX_UNKNOWN
+
 
 # sensors_battery()
-if enum is None:
+class BatteryTime(enum.IntEnum):
     POWER_TIME_UNKNOWN = -1
     POWER_TIME_UNLIMITED = -2
-else:
 
-    class BatteryTime(enum.IntEnum):
-        POWER_TIME_UNKNOWN = -1
-        POWER_TIME_UNLIMITED = -2
 
-    globals().update(BatteryTime.__members__)
+globals().update(BatteryTime.__members__)
 
 # --- others
 
 ENCODING = sys.getfilesystemencoding()
-if not PY3:
-    ENCODING_ERRS = "replace"
-else:
-    try:
-        ENCODING_ERRS = sys.getfilesystemencodeerrors()  # py 3.6
-    except AttributeError:
-        ENCODING_ERRS = "surrogateescape" if POSIX else "replace"
+ENCODING_ERRS = sys.getfilesystemencodeerrors()
 
 
 # ===================================================================
@@ -382,22 +364,17 @@ class TimeoutExpired(Error):
 
 # This should be in _compat.py rather than here, but does not work well
 # with setup.py importing this module via a sys.path trick.
-if PY3:
-    if isinstance(__builtins__, dict):  # cpython
-        exec_ = __builtins__["exec"]
-    else:  # pypy
-        exec_ = getattr(__builtins__, "exec")  # noqa
+if isinstance(__builtins__, dict):  # cpython
+    exec_ = __builtins__["exec"]
+else:  # pypy
+    exec_ = getattr(__builtins__, "exec")  # noqa
 
-    exec_("""def raise_from(value, from_value):
+exec_("""def raise_from(value, from_value):
     try:
         raise value from from_value
     finally:
         value = None
     """)
-else:
-
-    def raise_from(value, from_value):
-        raise value
 
 
 def usage_percent(used, total, round_=None):
@@ -604,26 +581,20 @@ def sockfam_to_enum(num):
     """Convert a numeric socket family value to an IntEnum member.
     If it's not a known member, return the numeric value itself.
     """
-    if enum is None:
+    try:
+        return socket.AddressFamily(num)
+    except ValueError:
         return num
-    else:  # pragma: no cover
-        try:
-            return socket.AddressFamily(num)
-        except ValueError:
-            return num
 
 
 def socktype_to_enum(num):
     """Convert a numeric socket type value to an IntEnum member.
     If it's not a known member, return the numeric value itself.
     """
-    if enum is None:
+    try:
+        return socket.SocketKind(num)
+    except ValueError:
         return num
-    else:  # pragma: no cover
-        try:
-            return socket.SocketKind(num)
-        except ValueError:
-            return num
 
 
 def conn_to_ntuple(fd, fam, type_, laddr, raddr, status, status_map, pid=None):
@@ -789,13 +760,9 @@ def open_binary(fname):
 
 
 def open_text(fname):
-    """On Python 3 opens a file in text mode by using fs encoding and
+    """Opens a file in text mode by using fs encoding and
     a proper en/decoding errors handler.
-    On Python 2 this is just an alias for open(name, 'rt').
     """
-    if not PY3:
-        return open(fname, buffering=FILE_READ_BUFFER_SIZE)
-
     # See:
     # https://github.com/giampaolo/psutil/issues/675
     # https://github.com/giampaolo/psutil/pull/733
@@ -864,15 +831,8 @@ def get_procfs_path():
     return sys.modules['psutil'].PROCFS_PATH
 
 
-if PY3:
-
-    def decode(s):
-        return s.decode(encoding=ENCODING, errors=ENCODING_ERRS)
-
-else:
-
-    def decode(s):
-        return s
+def decode(s):
+    return s.decode(encoding=ENCODING, errors=ENCODING_ERRS)
 
 
 # =====================================================================
