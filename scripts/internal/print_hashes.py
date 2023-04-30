@@ -32,8 +32,9 @@ def main():
             md5 = csum(file, "md5")
             sha256 = csum(file, "sha256")
             print(
-                "%s\nmd5: %s\nsha256: %s\n"
-                % (os.path.basename(file), md5, sha256)
+                "{}\nmd5: {}\nsha256: {}\n".format(
+                    os.path.basename(file), md5, sha256
+                )
             )
         else:
             print("skipping %r (not a file)" % file)

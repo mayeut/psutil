@@ -20,7 +20,7 @@ class Wheel:
         self._name = os.path.basename(path)
 
     def __repr__(self):
-        return "<%s(name=%s, plat=%s, arch=%s, pyver=%s)>" % (
+        return "<{}(name={}, plat={}, arch={}, pyver={})>".format(
             self.__class__.__name__,
             self.name,
             self.platform(),
@@ -111,7 +111,7 @@ def main():
     tot_size = 0
     templ = "%-120s %7s %7s %7s"
     for platf, pkgs in groups.items():
-        ppn = "%s (%s)" % (platf, len(pkgs))
+        ppn = f"{platf} ({len(pkgs)})"
         s = templ % (ppn, "size", "arch", "pyver")
         print_color('\n' + s, color=None, bold=True)
         for pkg in sorted(pkgs, key=lambda x: x.name):
@@ -129,8 +129,10 @@ def main():
                 print_color(s, color='brown')
 
     print_color(
-        "\n\ntotals: files=%s, size=%s" % (tot_files, bytes2human(tot_size)),
-        bold=True,
+        "\n\ntotals: files={}, size={}".format(
+            tot_files, bytes2human(tot_size)
+        ),
+        bold=True
     )
 
 

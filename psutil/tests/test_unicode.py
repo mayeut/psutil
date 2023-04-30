@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2009, Giampaolo Rodola'. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -124,7 +123,7 @@ if APPVEYOR:
 
         try:
             return rm(path)
-        except WindowsError:
+        except OSError:
             traceback.print_exc()
 
 
@@ -140,7 +139,7 @@ def try_unicode(suffix):
         sproc = spawn_testproc(cmd=[testfn])
         shutil.copyfile(testfn, testfn + '-2')
         safe_rmpath(testfn + '-2')
-    except (UnicodeEncodeError, IOError):
+    except (UnicodeEncodeError, OSError):
         return False
     else:
         return True

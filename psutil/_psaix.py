@@ -148,7 +148,7 @@ def cpu_count_cores():
         x.decode(sys.stdout.encoding) for x in (stdout, stderr)
     )
     if p.returncode != 0:
-        raise RuntimeError("%r command error\n%s" % (cmd, stderr))
+        raise RuntimeError(f"{cmd!r} command error\n{stderr}")
     processors = stdout.strip().splitlines()
     return len(processors) or None
 
@@ -441,7 +441,7 @@ class Process:
             # is no longer there.
             if not retlist:
                 # will raise NSP if process is gone
-                os.stat('%s/%s' % (self._procfs_path, self.pid))
+                os.stat(f'{self._procfs_path}/{self.pid}')
             return retlist
 
     @wrap_exceptions
@@ -454,7 +454,7 @@ class Process:
         # is no longer there.
         if not ret:
             # will raise NSP if process is gone
-            os.stat('%s/%s' % (self._procfs_path, self.pid))
+            os.stat(f'{self._procfs_path}/{self.pid}')
         return ret
 
     @wrap_exceptions
@@ -500,10 +500,10 @@ class Process:
     def cwd(self):
         procfs_path = self._procfs_path
         try:
-            result = os.readlink("%s/%s/cwd" % (procfs_path, self.pid))
+            result = os.readlink(f"{procfs_path}/{self.pid}/cwd")
             return result.rstrip('/')
         except FileNotFoundError:
-            os.stat("%s/%s" % (procfs_path, self.pid))  # raise NSP or AD
+            os.stat(f"{procfs_path}/{self.pid}")  # raise NSP or AD
             return ""
 
     @wrap_exceptions
@@ -550,7 +550,7 @@ class Process:
     def num_fds(self):
         if self.pid == 0:  # no /proc/0/fd
             return 0
-        return len(os.listdir("%s/%s/fd" % (self._procfs_path, self.pid)))
+        return len(os.listdir(f"{self._procfs_path}/{self.pid}/fd"))
 
     @wrap_exceptions
     def num_ctx_switches(self):

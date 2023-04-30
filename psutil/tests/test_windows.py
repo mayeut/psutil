@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: UTF-8 -*
 
 # Copyright (c) 2009, Giampaolo Rodola'. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -80,7 +79,7 @@ def wmic(path, what, converter=int):
     >>> wmic("Win32_OperatingSystem", "FreePhysicalMemory")
     2134124534
     """
-    out = sh("wmic path %s get %s" % (path, what)).strip()
+    out = sh(f"wmic path {path} get {what}").strip()
     data = "".join(out.splitlines()[1:]).strip()  # get rid of the header
     if converter is not None:
         if "," in what:
@@ -205,7 +204,7 @@ class TestSystemAPIs(WindowsTestCase):
         # Note: this test might fail if the OS is starting/killing
         # other processes in the meantime
         w = wmi.WMI().Win32_Process()
-        wmi_pids = set([x.ProcessId for x in w])
+        wmi_pids = {x.ProcessId for x in w}
         psutil_pids = set(psutil.pids())
         self.assertEqual(wmi_pids, psutil_pids)
 
@@ -635,7 +634,7 @@ class TestProcessWMI(WindowsTestCase):
         w = wmi.WMI().Win32_Process(ProcessId=self.pid)[0]
         p = psutil.Process(self.pid)
         domain, _, username = w.GetOwner()
-        username = "%s\\%s" % (domain, username)
+        username = f"{domain}\\{username}"
         self.assertEqual(p.username(), username)
 
     @retry_on_failure()
@@ -864,7 +863,7 @@ class RemoteProcessTestCase(PsutilTestCase):
 @unittest.skipIf(not WINDOWS, "WINDOWS only")
 class TestServices(PsutilTestCase):
     def test_win_service_iter(self):
-        valid_statuses = set([
+        valid_statuses = {
             "running",
             "paused",
             "start",

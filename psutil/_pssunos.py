@@ -238,7 +238,7 @@ def disk_partitions(all=False):
                     continue
             except OSError as err:
                 # https://github.com/giampaolo/psutil/issues/1674
-                debug("skipping %r: %s" % (mountpoint, err))
+                debug(f"skipping {mountpoint!r}: {err}")
                 continue
         maxfile = maxpath = None  # set later
         ntuple = _common.sdiskpart(
@@ -397,7 +397,7 @@ class Process:
         """Raise NSP if the process disappeared on us."""
         # For those C function who do not raise NSP, possibly returning
         # incorrect or incomplete result.
-        os.stat('%s/%s' % (self._procfs_path, self.pid))
+        os.stat(f'{self._procfs_path}/{self.pid}')
 
     def oneshot_enter(self):
         self._proc_name_and_args.cache_activate(self)
@@ -554,9 +554,9 @@ class Process:
         # Reference: http://goo.gl/55XgO
         procfs_path = self._procfs_path
         try:
-            return os.readlink("%s/%s/path/cwd" % (procfs_path, self.pid))
+            return os.readlink(f"{procfs_path}/{self.pid}/path/cwd")
         except FileNotFoundError:
-            os.stat("%s/%s" % (procfs_path, self.pid))  # raise NSP or AD
+            os.stat(f"{procfs_path}/{self.pid}")  # raise NSP or AD
             return ""
 
     @wrap_exceptions
@@ -646,7 +646,7 @@ class Process:
                 raise AccessDenied(self.pid, self._name)
             if 'no such process' in stderr.lower():
                 raise NoSuchProcess(self.pid, self._name)
-            raise RuntimeError("%r command error\n%s" % (cmd, stderr))
+            raise RuntimeError(f"{cmd!r} command error\n{stderr}")
 
         lines = stdout.split('\n')[2:]
         for i, line in enumerate(lines):
@@ -672,7 +672,7 @@ class Process:
         # is no longer there.
         if not ret:
             # will raise NSP if process is gone
-            os.stat('%s/%s' % (self._procfs_path, self.pid))
+            os.stat(f'{self._procfs_path}/{self.pid}')
 
         # UNIX sockets
         if kind in ('all', 'unix'):
@@ -726,7 +726,7 @@ class Process:
                         # unresolved link path.
                         # This seems an incosistency with /proc similar
                         # to: http://goo.gl/55XgO
-                        name = '%s/%s/path/%s' % (procfs_path, self.pid, name)
+                        name = f'{procfs_path}/{self.pid}/path/{name}'
                         hit_enoent = True
                     else:
                         raise
@@ -737,7 +737,7 @@ class Process:
 
     @wrap_exceptions
     def num_fds(self):
-        return len(os.listdir("%s/%s/fd" % (self._procfs_path, self.pid)))
+        return len(os.listdir(f"{self._procfs_path}/{self.pid}/fd"))
 
     @wrap_exceptions
     def num_ctx_switches(self):

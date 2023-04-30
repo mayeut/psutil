@@ -9,8 +9,6 @@ Process.oneshot() ctx manager.
 See: https://github.com/giampaolo/psutil/issues/799.
 """
 
-from __future__ import division
-from __future__ import print_function
 
 import sys
 import textwrap
@@ -128,8 +126,9 @@ setup = textwrap.dedent("""
 
 def main():
     print(
-        "%s methods involved on platform %r (%s iterations, psutil %s):"
-        % (len(names), sys.platform, ITERATIONS, psutil.__version__)
+        "{} methods involved on platform {!r} ({} iterations, psutil {}):".format(
+            len(names), sys.platform, ITERATIONS, psutil.__version__
+        )
     )
     for name in sorted(names):
         print("    " + name)

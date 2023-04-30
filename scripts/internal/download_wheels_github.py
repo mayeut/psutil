@@ -36,7 +36,7 @@ TIMEOUT = 30
 
 
 def get_artifacts():
-    base_url = "https://api.github.com/repos/%s/%s" % (USER, PROJECT)
+    base_url = f"https://api.github.com/repos/{USER}/{PROJECT}"
     url = base_url + "/actions/artifacts"
     res = requests.get(
         url=url, headers={"Authorization": "token %s" % TOKEN}, timeout=TIMEOUT
@@ -57,7 +57,7 @@ def download_zip(url):
         for chunk in res.iter_content(chunk_size=16384):
             f.write(chunk)
             totbytes += len(chunk)
-    print("got %s, size %s)" % (OUTFILE, bytes2human(totbytes)))
+    print(f"got {OUTFILE}, size {bytes2human(totbytes)})")
 
 
 def rename_win27_wheels():
@@ -65,12 +65,12 @@ def rename_win27_wheels():
     src = 'dist/psutil-%s-cp27-cp27m-win32.whl' % PROJECT_VERSION
     dst = 'dist/psutil-%s-cp27-none-win32.whl' % PROJECT_VERSION
     if os.path.exists(src):
-        print("rename: %s\n        %s" % (src, dst))
+        print(f"rename: {src}\n        {dst}")
         os.rename(src, dst)
     src = 'dist/psutil-%s-cp27-cp27m-win_amd64.whl' % PROJECT_VERSION
     dst = 'dist/psutil-%s-cp27-none-win_amd64.whl' % PROJECT_VERSION
     if os.path.exists(src):
-        print("rename: %s\n        %s" % (src, dst))
+        print(f"rename: {src}\n        {dst}")
         os.rename(src, dst)
 
 

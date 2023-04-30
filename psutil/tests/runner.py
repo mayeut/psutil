@@ -19,7 +19,6 @@ Parallel:
 - make test-process ARGS=--parallel
 """
 
-from __future__ import print_function
 
 import atexit
 import optparse

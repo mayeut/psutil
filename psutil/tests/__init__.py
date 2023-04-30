@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2009, Giampaolo Rodola'. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test utilities."""
 
-from __future__ import print_function
 
 import atexit
 import contextlib
@@ -280,7 +277,7 @@ class ThreadTask(threading.Thread):
 
     def __repr__(self):
         name = self.__class__.__name__
-        return '<%s running=%s at %#x>' % (name, self._running, id(self))
+        return f'<{name} running={self._running} at {id(self):#x}>'
 
     def __enter__(self):
         self.start()
@@ -385,13 +382,13 @@ def spawn_children_pair():
         s = textwrap.dedent("""\
             import subprocess, os, sys, time
             s = "import os, time;"
-            s += "f = open('%s', 'w');"
+            s += "f = open('{}', 'w');"
             s += "f.write(str(os.getpid()));"
             s += "f.close();"
             s += "time.sleep(60);"
-            p = subprocess.Popen([r'%s', '-c', s])
+            p = subprocess.Popen([r'{}', '-c', s])
             p.wait()
-            """ % (os.path.basename(testfn), PYTHON_EXE))
+            """.format(os.path.basename(testfn), PYTHON_EXE))
         # On Windows if we create a subprocess with CREATE_NO_WINDOW flag
         # set (which is the default) a "conhost.exe" extra process will be
         # spawned as a child. We don't want that.
@@ -776,7 +773,7 @@ def safe_rmpath(path):
                 return fun()
             except FileNotFoundError:
                 pass
-            except WindowsError as _:
+            except OSError as _:
                 err = _
                 warn("ignoring %s" % (str(err)))
             time.sleep(0.01)
@@ -1121,7 +1118,7 @@ class TestMemoryLeak(PsutilTestCase):
             type_ = "fd" if POSIX else "handle"
             if diff > 1:
                 type_ += "s"
-            msg = "%s unclosed %s after calling %r" % (diff, type_, fun)
+            msg = f"{diff} unclosed {type_} after calling {fun!r}"
             raise self.fail(msg)
 
     def _call_ntimes(self, fun, times):
@@ -1231,7 +1228,7 @@ def print_sysinfo():
         if hasattr(platform, 'win32_edition'):
             info['OS'] += ", " + platform.win32_edition()
     else:
-        info['OS'] = "%s %s" % (platform.system(), platform.version())
+        info['OS'] = f"{platform.system()} {platform.version()}"
     info['arch'] = ', '.join(
         list(platform.architecture()) + [platform.machine()]
     )
@@ -1262,7 +1259,7 @@ def print_sysinfo():
     # system
     info['fs-encoding'] = sys.getfilesystemencoding()
     lang = locale.getlocale()
-    info['lang'] = '%s, %s' % (lang[0], lang[1])
+    info['lang'] = f'{lang[0]}, {lang[1]}'
     info['boot-time'] = datetime.datetime.fromtimestamp(
         psutil.boot_time()
     ).strftime("%Y-%m-%d %H:%M:%S")
@@ -1466,9 +1463,9 @@ class process_namespace:
 
     @classmethod
     def test(cls):
-        this = set([x[0] for x in cls.all])
-        ignored = set([x[0] for x in cls.ignored])
-        klass = set([x for x in dir(psutil.Process) if x[0] != '_'])
+        this = {x[0] for x in cls.all}
+        ignored = {x[0] for x in cls.ignored}
+        klass = {x for x in dir(psutil.Process) if x[0] != '_'}
         leftout = (this | ignored) ^ klass
         if leftout:
             raise ValueError("uncovered Process class names: %r" % leftout)
@@ -1774,7 +1771,7 @@ def check_connection_ntuple(conn):
             with contextlib.closing(s):
                 try:
                     s.bind((conn.laddr[0], 0))
-                except socket.error as err:
+                except OSError as err:
                     if err.errno != errno.EADDRNOTAVAIL:
                         raise
         elif conn.family == AF_UNIX:

@@ -10,7 +10,6 @@ against the files which were modified in the commit. Install this with
 "make install-git-hooks".
 """
 
-from __future__ import print_function
 
 import os
 import shlex
@@ -19,7 +18,6 @@ import sys
 
 
 PYTHON = sys.executable
-PY3 = sys.version_info[0] >= 3
 THIS_SCRIPT = os.path.realpath(__file__)
 
 
@@ -48,7 +46,7 @@ def hilite(s, ok=True, bold=False):
         attr.append('31')
     if bold:
         attr.append('1')
-    return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
+    return '\x1b[{}m{}\x1b[0m'.format(';'.join(attr), s)
 
 
 def exit(msg):
@@ -76,8 +74,7 @@ def sh(cmd):
 
 
 def open_text(path):
-    kw = {'encoding': 'utf8'} if PY3 else {}
-    return open(path, **kw)
+    return open(path, encoding='utf8')
 
 
 def git_commit_files():

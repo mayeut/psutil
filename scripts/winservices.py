@@ -43,14 +43,10 @@ if os.name != 'nt':
 def main():
     for service in psutil.win_service_iter():
         info = service.as_dict()
-        print("%r (%r)" % (info['name'], info['display_name']))
-        s = "status: %s, start: %s, username: %s, pid: %s" % (
-            info['status'],
-            info['start_type'],
-            info['username'],
-            info['pid'],
-        )
-        print(s)
+        print("{!r} ({!r})".format(info['name'], info['display_name']))
+        print("status: {}, start: {}, username: {}, pid: {}".format(
+            info['status'], info['start_type'], info['username'], info['pid']
+        ))
         print("binpath: %s" % info['binpath'])
         print()
 

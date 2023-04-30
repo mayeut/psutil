@@ -7,8 +7,6 @@
 # Note: this module is imported by setup.py so it should not import
 # psutil or third-party modules.
 
-from __future__ import division
-from __future__ import print_function
 
 import collections
 import contextlib
@@ -296,8 +294,8 @@ class Error(Exception):
     def __repr__(self):
         # invoked on `repr(Error)`
         info = self._infodict(("pid", "ppid", "name", "seconds", "msg"))
-        details = ", ".join(["%s=%r" % (k, v) for k, v in info.items()])
-        return "psutil.%s(%s)" % (self.__class__.__name__, details)
+        details = ", ".join([f"{k}={v!r}" for k, v in info.items()])
+        return f"psutil.{self.__class__.__name__}({details})"
 
 
 class NoSuchProcess(Error):
@@ -545,7 +543,7 @@ def supports_ipv6():
         with contextlib.closing(sock):
             sock.bind(("::1", 0))
         return True
-    except socket.error:
+    except OSError:
         return False
 
 
@@ -798,7 +796,7 @@ def cat(fname, fallback=_DEFAULT, _open=open_text):
         try:
             with _open(fname) as f:
                 return f.read()
-        except (IOError, OSError):
+        except OSError:
             return fallback
 
 
@@ -882,7 +880,7 @@ def hilite(s, color=None, bold=False):  # pragma: no cover
     attr.append(color)
     if bold:
         attr.append('1')
-    return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
+    return '\x1b[{}m{}\x1b[0m'.format(';'.join(attr), s)
 
 
 def print_color(

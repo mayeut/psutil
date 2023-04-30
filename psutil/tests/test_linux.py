@@ -6,7 +6,6 @@
 
 """Linux specific tests."""
 
-from __future__ import division
 
 import collections
 import contextlib
@@ -921,7 +920,7 @@ class TestSystemCPUFrequency(PsutilTestCase):
         # See: https://github.com/giampaolo/psutil/issues/1071
         def open_mock(name, *args, **kwargs):
             if name.endswith('/scaling_cur_freq'):
-                raise IOError(errno.ENOENT, "")
+                raise OSError(errno.ENOENT, "")
             elif name.endswith('/cpuinfo_cur_freq'):
                 return io.BytesIO(b"200000")
             elif name == '/proc/cpuinfo':
@@ -1131,7 +1130,7 @@ class TestSystemNetConnections(PsutilTestCase):
             s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             self.addCleanup(s.close)
             s.bind(("::1", 0))
-        except socket.error:
+        except OSError:
             pass
         psutil.net_connections(kind='inet6')
 
@@ -1447,7 +1446,7 @@ class TestMisc(PsutilTestCase):
 
             def open_mock(name, *args, **kwargs):
                 if name.startswith('/proc'):
-                    raise IOError(errno.ENOENT, 'rejecting access for test')
+                    raise OSError(errno.ENOENT, 'rejecting access for test')
                 return orig_open(name, *args, **kwargs)
 
             with mock.patch('builtins.open', side_effect=open_mock):
@@ -1625,7 +1624,7 @@ class TestSensorsBattery(PsutilTestCase):
         # case code relies on /status file.
         def open_mock(name, *args, **kwargs):
             if name.endswith(('AC0/online', 'AC/online')):
-                raise IOError(errno.ENOENT, "")
+                raise OSError(errno.ENOENT, "")
             elif name.endswith("/status"):
                 return io.StringIO("charging")
             else:
@@ -1654,7 +1653,7 @@ class TestSensorsBattery(PsutilTestCase):
         # case code relies on /status file.
         def open_mock(name, *args, **kwargs):
             if name.endswith(('AC0/online', 'AC/online')):
-                raise IOError(errno.ENOENT, "")
+                raise OSError(errno.ENOENT, "")
             elif name.endswith("/status"):
                 return io.StringIO("discharging")
             else:
@@ -2050,7 +2049,7 @@ class TestProcess(PsutilTestCase):
         # of raising NSP.
         def open_mock_1(name, *args, **kwargs):
             if name.startswith('/proc/%s/task' % os.getpid()):
-                raise IOError(errno.ENOENT, "")
+                raise OSError(errno.ENOENT, "")
             else:
                 return orig_open(name, *args, **kwargs)
 
@@ -2064,7 +2063,7 @@ class TestProcess(PsutilTestCase):
         # exception.
         def open_mock_2(name, *args, **kwargs):
             if name.startswith('/proc/%s/task' % os.getpid()):
-                raise IOError(errno.EPERM, "")
+                raise OSError(errno.EPERM, "")
             else:
                 return orig_open(name, *args, **kwargs)
 

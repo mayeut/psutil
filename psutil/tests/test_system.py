@@ -166,7 +166,7 @@ class TestProcessAPIs(PsutilTestCase):
         sproc1.terminate()
         sproc2.terminate()
         gone, alive = test_2(procs, callback)
-        self.assertEqual(set(pids), set([sproc1.pid, sproc2.pid, sproc3.pid]))
+        self.assertEqual(set(pids), {sproc1.pid, sproc2.pid, sproc3.pid})
         for p in gone:
             self.assertTrue(hasattr(p, 'returncode'))
 
@@ -310,7 +310,7 @@ class TestMemoryAPIs(PsutilTestCase):
                 self.assertIsInstance(value, int)
             if name != 'total':
                 if not value >= 0:
-                    raise self.fail("%r < 0 (%s)" % (name, value))
+                    raise self.fail(f"{name!r} < 0 ({value})")
                 if value > mem.total:
                     raise self.fail(
                         "%r > total (total=%s, %s=%s)"
@@ -796,7 +796,7 @@ class TestNetAPIs(PsutilTestCase):
         # self.assertEqual(sorted(nics.keys()),
         #                  sorted(psutil.net_io_counters(pernic=True).keys()))
 
-        families = set([socket.AF_INET, socket.AF_INET6, psutil.AF_LINK])
+        families = {socket.AF_INET, socket.AF_INET6, psutil.AF_LINK}
         for nic, addrs in nics.items():
             self.assertIsInstance(nic, str)
             self.assertEqual(len(set(addrs)), len(addrs))

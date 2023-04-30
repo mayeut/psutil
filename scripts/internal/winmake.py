@@ -11,7 +11,6 @@ This was originally written as a bat file but they suck so much
 that they should be deemed illegal!
 """
 
-from __future__ import print_function
 
 import argparse
 import atexit
@@ -274,7 +273,7 @@ def install_pip():
             f.write(data)
 
         try:
-            sh('%s %s --user' % (PYTHON, tfile))
+            sh(f'{PYTHON} {tfile} --user')
         finally:
             os.remove(tfile)
 
@@ -328,7 +327,7 @@ def uninstall():
                             if 'psutil' not in line:
                                 f.write(line)
                             else:
-                                print("removed line %r from %r" % (line, path))
+                                print(f"removed line {line!r} from {path!r}")
 
 
 def clean():
@@ -361,21 +360,20 @@ def setup_dev_env():
     """Install useful deps."""
     install_pip()
     install_git_hooks()
-    sh("%s -m pip install -U %s" % (PYTHON, " ".join(DEPS)))
-
+    sh("{} -m pip install -U {}".format(PYTHON, " ".join(DEPS)))
 
 
 def test(name=RUNNER_PY):
     """Run tests."""
     build()
-    sh("%s %s" % (PYTHON, name))
+    sh(f"{PYTHON} {name}")
 
 
 def coverage():
     """Run coverage tests."""
     # Note: coverage options are controlled by .coveragerc file
     build()
-    sh("%s -m coverage run %s" % (PYTHON, RUNNER_PY))
+    sh(f"{PYTHON} -m coverage run {RUNNER_PY}")
     sh("%s -m coverage report" % PYTHON)
     sh("%s -m coverage html" % PYTHON)
     sh("%s -m webbrowser -t htmlcov/index.html" % PYTHON)
@@ -438,13 +436,13 @@ def test_testutils():
 def test_by_name(name):
     """Run test by name."""
     build()
-    sh("%s -m unittest -v %s" % (PYTHON, name))
+    sh(f"{PYTHON} -m unittest -v {name}")
 
 
 def test_last_failed():
     """Re-run tests which failed on last run."""
     build()
-    sh("%s %s --last-failed" % (PYTHON, RUNNER_PY))
+    sh(f"{PYTHON} {RUNNER_PY} --last-failed")
 
 
 def test_memleaks():

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2009, Giampaolo Rodola'. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -20,7 +18,6 @@ sensors) in Python. Supported platforms:
 Works with Python versions 3.6+.
 """
 
-from __future__ import division
 
 import collections
 import contextlib
@@ -281,7 +278,7 @@ def _pprint_secs(secs):
 # =====================================================================
 
 
-class Process(object):  # noqa: UP004
+class Process:
     """Represents an OS process with the given PID.
     If PID is omitted current process PID (os.getpid()) is used.
     Raise NoSuchProcess if PID does not exist.
@@ -389,7 +386,7 @@ class Process(object):  # noqa: UP004
                 info["exitcode"] = self._exitcode
             if self._create_time is not None:
                 info['started'] = _pprint_secs(self._create_time)
-            return "%s.%s(%s)" % (
+            return "{}.{}({})".format(
                 self.__class__.__module__,
                 self.__class__.__name__,
                 ", ".join(["%s=%r" % (k, v) for k, v in info.items()]),
@@ -1410,7 +1407,7 @@ class Popen(Process):
     def wait(self, timeout=None):
         if self.__subproc.returncode is not None:
             return self.__subproc.returncode
-        ret = super(Popen, self).wait(timeout)  # noqa
+        ret = super().wait(timeout)
         self.__subproc.returncode = ret
         return ret
 
@@ -2475,7 +2472,7 @@ def test():  # pragma: no cover
         print(line[: get_terminal_size()[0]])  # NOQA
 
 
-del memoize_when_activated, division
+del memoize_when_activated
 
 
 if __name__ == "__main__":

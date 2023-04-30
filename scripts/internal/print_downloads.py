@@ -11,7 +11,6 @@ Useful sites:
 * https://hugovk.github.io/top-pypi-packages/.
 """
 
-from __future__ import print_function
 
 import json
 import os
@@ -68,7 +67,9 @@ def query(cmd):
 def top_packages():
     global LAST_UPDATE
     ret = query(
-        "pypinfo --all --json --days %s --limit %s '' project" % (DAYS, LIMIT)
+        "pypinfo --all --json --days {} --limit {} '' project".format(
+            DAYS, LIMIT
+        )
     )
     LAST_UPDATE = ret['last_update']
     return [(x['project'], x['download_count']) for x in ret['rows']]
@@ -93,19 +94,19 @@ def downloads():
 
 
 def downloads_pyver():
-    return query("pypinfo --json --days %s %s pyversion" % (DAYS, PKGNAME))
+    return query(f"pypinfo --json --days {DAYS} {PKGNAME} pyversion")
 
 
 def downloads_by_country():
-    return query("pypinfo --json --days %s %s country" % (DAYS, PKGNAME))
+    return query(f"pypinfo --json --days {DAYS} {PKGNAME} country")
 
 
 def downloads_by_system():
-    return query("pypinfo --json --days %s %s system" % (DAYS, PKGNAME))
+    return query(f"pypinfo --json --days {DAYS} {PKGNAME} system")
 
 
 def downloads_by_distro():
-    return query("pypinfo --json --days %s %s distro" % (DAYS, PKGNAME))
+    return query(f"pypinfo --json --days {DAYS} {PKGNAME} distro")
 
 
 # --- print
@@ -116,7 +117,7 @@ templ = "| %-30s | %15s |"
 
 def print_row(left, right):
     if isinstance(right, int):
-        right = '{:,}'.format(right)
+        right = f'{right:,}'
     print(templ % (left, right))
 
 

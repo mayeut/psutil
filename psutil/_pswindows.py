@@ -493,7 +493,7 @@ class WindowsService:  # noqa: PLW1641
         return "%s%s" % (self.__class__.__name__, details)
 
     def __repr__(self):
-        return "<%s at %s>" % (self.__str__(), id(self))
+        return f"<{self.__str__()} at {id(self)}>"
 
     def __eq__(self, other):
         # Test for equality with another WindosService object based
@@ -709,7 +709,7 @@ def retry_error_partial_copy(fun):
         for _ in range(times):  # retries for roughly 1 second
             try:
                 return fun(self, *args, **kwargs)
-            except WindowsError as _:
+            except OSError as _:
                 err = _
                 if err.winerror == ERROR_PARTIAL_COPY:
                     time.sleep(delay)
@@ -772,7 +772,7 @@ class Process:
         if PYPY:
             try:
                 exe = cext.proc_exe(self.pid)
-            except WindowsError as err:
+            except OSError as err:
                 # 24 = ERROR_TOO_MANY_OPEN_FILES. Not sure why this happens
                 # (perhaps PyPy's JIT delaying garbage collection of files?).
                 if err.errno == 24:

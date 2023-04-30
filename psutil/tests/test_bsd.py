@@ -118,9 +118,9 @@ class BSDTestCase(PsutilTestCase):
             self.assertEqual(usage.total, total)
             # 10 MB tolerance
             if abs(usage.free - free) > 10 * 1024 * 1024:
-                raise self.fail("psutil=%s, df=%s" % (usage.free, free))
+                raise self.fail(f"psutil={usage.free}, df={free}")
             if abs(usage.used - used) > 10 * 1024 * 1024:
-                raise self.fail("psutil=%s, df=%s" % (usage.used, used))
+                raise self.fail(f"psutil={usage.used}, df={used}")
 
     @unittest.skipIf(not which('sysctl'), "sysctl cmd not available")
     def test_cpu_count_logical(self):
@@ -173,7 +173,7 @@ class FreeBSDPsutilTestCase(PsutilTestCase):
             fields = line.split()
             _, start, stop, perms, res = fields[:5]
             map = maps.pop()
-            self.assertEqual("%s-%s" % (start, stop), map.addr)
+            self.assertEqual(f"{start}-{stop}", map.addr)
             self.assertEqual(int(res), map.rss)
             if not map.path.startswith('['):
                 self.assertEqual(fields[10], map.path)
