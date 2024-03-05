@@ -1842,11 +1842,13 @@ def filter_proc_connections(cons):
 def reload_module(module):
     """Backport of importlib.reload of Python 3.3+."""
     import importlib
+
     return importlib.reload(module)
 
 
 def import_module_by_path(path):
     import importlib.util
+
     name = os.path.splitext(os.path.basename(path))[0]
     spec = importlib.util.spec_from_file_location(name, path)
     mod = importlib.util.module_from_spec(spec)

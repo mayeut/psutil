@@ -515,7 +515,7 @@ class WindowsService:  # noqa: PLW1641
             display_name=display_name,
             binpath=binpath,
             username=username,
-            start_type=start_type
+            start_type=start_type,
         )
 
     def _query_status(self):

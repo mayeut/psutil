@@ -85,9 +85,10 @@ if POSIX:
 
 extras_require = {}
 if not PYPY:
-    extras_require['test'].extend(
-        ["pywin32; sys.platform == 'win32'", "wmi; sys.platform == 'win32'"]
-    )
+    extras_require['test'] = [
+        "pywin32; sys.platform == 'win32'",
+        "wmi; sys.platform == 'win32'",
+    ]
 
 
 def get_version():

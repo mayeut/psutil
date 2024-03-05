@@ -204,7 +204,7 @@ def refresh_window(procs, procs_status):
             ctime = "{}:{}.{}".format(
                 ctime.seconds // 60 % 60,
                 str(ctime.seconds % 60).zfill(2),
-                str(ctime.microseconds)[:2]
+                str(ctime.microseconds)[:2],
             )
         else:
             ctime = ''

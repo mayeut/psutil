@@ -343,8 +343,11 @@ def users():
 
 def pids():
     """Returns a list of PIDs currently running on the system."""
-    return [int(x) for x in os.listdir(get_procfs_path().encode("latin-1"))
-            if x.isdigit()]
+    return [
+        int(x)
+        for x in os.listdir(get_procfs_path().encode("latin-1"))
+        if x.isdigit()
+    ]
 
 
 def pid_exists(pid):

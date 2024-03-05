@@ -2219,6 +2219,7 @@ def net_if_addrs():
     associated with each interface.
     """
     import socket
+
     rawlist = _psplatform.net_if_addrs()
     rawlist.sort(key=lambda x: x[1])  # sort by family
     ret = collections.defaultdict(list)
@@ -2229,8 +2230,7 @@ def net_if_addrs():
             if WINDOWS and fam == -1:
                 fam = _psplatform.AF_LINK
             elif (
-                hasattr(_psplatform, "AF_LINK")
-                and fam == _psplatform.AF_LINK
+                hasattr(_psplatform, "AF_LINK") and fam == _psplatform.AF_LINK
             ):
                 # Linux defines AF_LINK as an alias for AF_PACKET.
                 # We re-set the family here so that repr(family)

@@ -1588,8 +1588,11 @@ def boot_time():
 
 def pids():
     """Returns a list of PIDs currently running on the system."""
-    return [int(x) for x in os.listdir(get_procfs_path().encode("latin-1"))
-            if x.isdigit()]
+    return [
+        int(x)
+        for x in os.listdir(get_procfs_path().encode("latin-1"))
+        if x.isdigit()
+    ]
 
 
 def pid_exists(pid):
@@ -2182,8 +2185,10 @@ class Process:
         def ionice_set(self, ioclass, value):
             if value is None:
                 value = 0
-            acceptable_classes = {IOPriority.IOPRIO_CLASS_IDLE,
-                                  IOPriority.IOPRIO_CLASS_NONE}
+            acceptable_classes = {
+                IOPriority.IOPRIO_CLASS_IDLE,
+                IOPriority.IOPRIO_CLASS_NONE,
+            }
             if value and ioclass in acceptable_classes:
                 raise ValueError("%r ioclass accepts no value" % ioclass)
             if value < 0 or value > 7:

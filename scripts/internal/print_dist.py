@@ -132,7 +132,7 @@ def main():
         "\n\ntotals: files={}, size={}".format(
             tot_files, bytes2human(tot_size)
         ),
-        bold=True
+        bold=True,
     )
 
 

@@ -144,9 +144,7 @@ def cpu_count_cores():
     cmd = ["lsdev", "-Cc", "processor"]
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
-    stdout, stderr = (
-        x.decode(sys.stdout.encoding) for x in (stdout, stderr)
-    )
+    stdout, stderr = (x.decode(sys.stdout.encoding) for x in (stdout, stderr))
     if p.returncode != 0:
         raise RuntimeError(f"{cmd!r} command error\n{stderr}")
     processors = stdout.strip().splitlines()
