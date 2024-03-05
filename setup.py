@@ -535,7 +535,7 @@ def main():
             elif FREEBSD:
                 if which('pkg'):
                     missdeps("pkg install gcc python3")
-                elif which('mport'):   # MidnightBSD
+                elif which('mport'):  # MidnightBSD
                     missdeps("mport install gcc python3")
             elif OPENBSD:
                 missdeps("pkg_add -v gcc python3")
