@@ -28,6 +28,8 @@ jobs:
         - {os: ubuntu-latest, arch: x86_64}
         - {os: ubuntu-latest, arch: i686}
         - {os: ubuntu-latest, arch: aarch64}
+        - {os: ubuntu-latest, arch: ppc64le}
+        - {os: ubuntu-latest, arch: s390x}
         - {os: macos-12, arch: x86_64}
         - {os: macos-14, arch: arm64}
         - {os: windows-2019, arch: AMD64}
@@ -50,7 +52,7 @@ jobs:
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
-      if: matrix.arch == 'aarch64'
+      if: runner.os == 'Linux'
 
     - name: Create wheels + run tests
       uses: pypa/cibuildwheel@v2.21.2
