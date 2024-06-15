@@ -27,7 +27,9 @@ from psutil.tests import HAS_CPU_FREQ
 from psutil.tests import HAS_NET_IO_COUNTERS
 from psutil.tests import HAS_SENSORS_FANS
 from psutil.tests import HAS_SENSORS_TEMPERATURES
+from psutil.tests import LIBC
 from psutil.tests import QEMU_USER
+from psutil.tests import S390X
 from psutil.tests import SKIP_SYSCONS
 from psutil.tests import PsutilTestCase
 from psutil.tests import create_sockets
@@ -252,6 +254,10 @@ class TestSystemAPITypes(PsutilTestCase):
             for conn in ret:
                 assert is_namedtuple(conn)
 
+    @pytest.mark.skipif(
+        QEMU_USER and S390X and LIBC != "glibc",
+        "deadlock with QEMU on s390x musl libc",
+    )
     def test_net_if_addrs(self):
         # Duplicate of test_system.py. Keep it anyway.
         for ifname, addrs in psutil.net_if_addrs().items():
