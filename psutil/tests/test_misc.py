@@ -41,9 +41,11 @@ from psutil.tests import HAS_NET_IO_COUNTERS
 from psutil.tests import HAS_SENSORS_BATTERY
 from psutil.tests import HAS_SENSORS_FANS
 from psutil.tests import HAS_SENSORS_TEMPERATURES
+from psutil.tests import LIBC
 from psutil.tests import PYTHON_EXE
 from psutil.tests import PYTHON_EXE_ENV
 from psutil.tests import QEMU_USER
+from psutil.tests import S390X
 from psutil.tests import SCRIPTS_DIR
 from psutil.tests import PsutilTestCase
 from psutil.tests import mock
@@ -289,9 +291,13 @@ class TestMisc(PsutilTestCase):
         for fun, name in ns.iter(ns.getters):
             if name in {"win_service_iter", "win_service_get"}:
                 continue
-            if QEMU_USER and name == "net_if_stats":
-                # OSError: [Errno 38] ioctl(SIOCETHTOOL) not implemented
-                continue
+            if QEMU_USER:
+                if name == "net_if_stats":
+                    # OSError: [Errno 38] ioctl(SIOCETHTOOL) not implemented
+                    continue
+                if S390X and LIBC != "glibc" and name == "net_if_addrs":
+                    # deadlock with QEMU on s390x musl libc
+                    continue
             with self.subTest(name=name):
                 try:
                     ret = fun()
