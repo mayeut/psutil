@@ -29,6 +29,8 @@ from psutil._common import supports_ipv6
 from psutil._compat import PY3
 from psutil.tests import AF_UNIX
 from psutil.tests import HAS_NET_CONNECTIONS_UNIX
+from psutil.tests import QEMU_USER
+from psutil.tests import S390X
 from psutil.tests import SKIP_SYSCONS
 from psutil.tests import PsutilTestCase
 from psutil.tests import bind_socket
@@ -151,6 +153,7 @@ class TestUnconnectedSockets(ConnectionTestCase):
             self.compare_procsys_connections(os.getpid(), cons, kind='all')
         return conn
 
+    @unittest.skipIf(QEMU_USER and S390X, "endianness issue")
     def test_tcp_v4(self):
         addr = ("127.0.0.1", 0)
         with closing(bind_socket(AF_INET, SOCK_STREAM, addr=addr)) as sock:
@@ -158,6 +161,7 @@ class TestUnconnectedSockets(ConnectionTestCase):
             self.assertEqual(conn.raddr, ())
             self.assertEqual(conn.status, psutil.CONN_LISTEN)
 
+    @unittest.skipIf(QEMU_USER and S390X, "endianness issue")
     @unittest.skipIf(not supports_ipv6(), "IPv6 not supported")
     def test_tcp_v6(self):
         addr = ("::1", 0)
@@ -166,6 +170,7 @@ class TestUnconnectedSockets(ConnectionTestCase):
             self.assertEqual(conn.raddr, ())
             self.assertEqual(conn.status, psutil.CONN_LISTEN)
 
+    @unittest.skipIf(QEMU_USER and S390X, "endianness issue")
     def test_udp_v4(self):
         addr = ("127.0.0.1", 0)
         with closing(bind_socket(AF_INET, SOCK_DGRAM, addr=addr)) as sock:
@@ -173,6 +178,7 @@ class TestUnconnectedSockets(ConnectionTestCase):
             self.assertEqual(conn.raddr, ())
             self.assertEqual(conn.status, psutil.CONN_NONE)
 
+    @unittest.skipIf(QEMU_USER and S390X, "endianness issue")
     @unittest.skipIf(not supports_ipv6(), "IPv6 not supported")
     def test_udp_v6(self):
         addr = ("::1", 0)
@@ -286,6 +292,7 @@ class TestFilters(ConnectionTestCase):
                     [SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET],
                 )
 
+    @unittest.skipIf(QEMU_USER and S390X, "endianness issue")
     @skip_on_access_denied(only_if=MACOS)
     def test_combos(self):
         reap_children()

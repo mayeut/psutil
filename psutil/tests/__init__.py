@@ -87,7 +87,7 @@ __all__ = [
     "HAS_IONICE", "HAS_MEMORY_MAPS", "HAS_PROC_CPU_NUM", "HAS_RLIMIT",
     "HAS_SENSORS_BATTERY", "HAS_BATTERY", "HAS_SENSORS_FANS",
     "HAS_SENSORS_TEMPERATURES", "HAS_NET_CONNECTIONS_UNIX", "MACOS_11PLUS",
-    "MACOS_12PLUS", "COVERAGE", 'AARCH64', "QEMU_USER",
+    "MACOS_12PLUS", "COVERAGE", 'AARCH64', "QEMU_USER", 'S390X',
     # subprocesses
     'pyrun', 'terminate', 'reap_children', 'spawn_testproc', 'spawn_zombie',
     'spawn_children_pair',
@@ -136,6 +136,7 @@ else:
 # are we a 64 bit process?
 IS_64BIT = sys.maxsize > 2**32
 AARCH64 = platform.machine() == "aarch64"
+S390X = platform.machine() == "s390x"
 
 
 @memoize
