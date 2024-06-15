@@ -74,6 +74,7 @@ __all__ = [
     "HAS_SENSORS_BATTERY", "HAS_BATTERY", "HAS_SENSORS_FANS",
     "HAS_SENSORS_TEMPERATURES", "HAS_NET_CONNECTIONS_UNIX", "MACOS_11PLUS",
     "MACOS_12PLUS", "COVERAGE", 'AARCH64', "QEMU_USER", "PYTEST_PARALLEL",
+    "S390X",
     # subprocesses
     'pyrun', 'terminate', 'reap_children', 'spawn_subproc', 'spawn_zombie',
     'spawn_children_pair',
@@ -123,6 +124,7 @@ else:
 IS_64BIT = sys.maxsize > 2**32
 # apparently they're the same
 AARCH64 = platform.machine() in {"aarch64", "arm64"}
+S390X = platform.machine() == "s390x"
 
 
 @memoize
