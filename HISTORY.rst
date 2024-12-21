@@ -7,6 +7,7 @@ XXXX-XX-XX
 
 **Enhancements**
 
+- 2476_: Build Python 3.13t (free-threading) wheels
 - 2480_: Dropped Python 2.7 support.
 
 **Compatibility notes**
