@@ -51,6 +51,7 @@ XXXX-XX-XX
 
 **Enhancements**
 
+- 2476_: Build Python 3.13t (free-threading) wheels
 - 669_, [Windows]: `net_if_addrs()`_ also returns the ``broadcast`` address
   instead of ``None``.
 - 2480_: Python 2.7 is no longer supported. Latest version supporting Python
