@@ -32,6 +32,8 @@ from psutil.tests import HAS_CPU_FREQ
 from psutil.tests import HAS_GETLOADAVG
 from psutil.tests import HAS_RLIMIT
 from psutil.tests import PYPY
+from psutil.tests import PYTEST_PARALLEL
+from psutil.tests import QEMU_USER
 from psutil.tests import TOLERANCE_DISK_USAGE
 from psutil.tests import TOLERANCE_SYS_MEM
 from psutil.tests import PsutilTestCase
@@ -981,6 +983,7 @@ class TestSystemNetIfAddrs(PsutilTestCase):
 
 
 @pytest.mark.skipif(not LINUX, reason="LINUX only")
+@pytest.mark.skipif(QEMU_USER, reason="QEMU user not supported")
 class TestSystemNetIfStats(PsutilTestCase):
     @pytest.mark.skipif(
         not shutil.which("ifconfig"), reason="ifconfig utility not available"
@@ -1548,7 +1551,7 @@ class TestMisc(PsutilTestCase):
         nthreads = len(p.threads())
         with ThreadTask():
             threads = p.threads()
-            assert len(threads) == nthreads + 1
+            assert len(threads) == nthreads + (2 if QEMU_USER else 1)
             tid = sorted(threads, key=lambda x: x.id)[1].id
             assert p.pid != tid
             pt = psutil.Process(tid)
@@ -2235,6 +2238,7 @@ class TestProcessAgainstStatus(PsutilTestCase):
         value = self.read_status_file("Name:")
         assert self.proc.name() == value
 
+    @pytest.mark.skipif(QEMU_USER, reason="QEMU user not supported")
     def test_status(self):
         value = self.read_status_file("State:")
         value = value[value.find('(') + 1 : value.rfind(')')]
