@@ -71,7 +71,8 @@ __all__ = [
     "HAS_IONICE", "HAS_MEMORY_MAPS", "HAS_PROC_CPU_NUM", "HAS_RLIMIT",
     "HAS_SENSORS_BATTERY", "HAS_BATTERY", "HAS_SENSORS_FANS",
     "HAS_SENSORS_TEMPERATURES", "HAS_NET_CONNECTIONS_UNIX", "MACOS_11PLUS",
-    "MACOS_12PLUS", "COVERAGE", 'AARCH64', "PYTEST_PARALLEL",
+    "MACOS_12PLUS", "COVERAGE", 'AARCH64', "QEMU_USER", "PYTEST_PARALLEL",
+    "S390X", "LIBC",
     # subprocesses
     'pyrun', 'terminate', 'reap_children', 'spawn_subproc', 'spawn_zombie',
     'spawn_children_pair',
@@ -112,11 +113,19 @@ GITHUB_ACTIONS = 'GITHUB_ACTIONS' in os.environ or 'CIBUILDWHEEL' in os.environ
 CI_TESTING = GITHUB_ACTIONS
 COVERAGE = 'COVERAGE_RUN' in os.environ
 PYTEST_PARALLEL = "PYTEST_XDIST_WORKER" in os.environ  # `make test-parallel`
+if LINUX and GITHUB_ACTIONS:
+    with open('/proc/1/cmdline') as f:
+        QEMU_USER = "/bin/qemu-" in f.read()
+else:
+    QEMU_USER = False
 # are we a 64 bit process?
 IS_64BIT = sys.maxsize > 2**32
 # apparently they're the same
 AARCH64 = platform.machine().lower() in {"aarch64", "arm64"}
+PPC64LE = platform.machine() == "ppc64le"
 RISCV64 = platform.machine() == "riscv64"
+S390X = platform.machine() == "s390x"
+LIBC, _ = platform.libc_ver() if LINUX else "", ""
 
 
 @memoize

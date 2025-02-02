@@ -45,6 +45,7 @@ from psutil.tests import HAS_SENSORS_TEMPERATURES
 from psutil.tests import IS_64BIT
 from psutil.tests import MACOS_12PLUS
 from psutil.tests import PYPY
+from psutil.tests import QEMU_USER
 from psutil.tests import UNICODE_SUFFIX
 from psutil.tests import PsutilTestCase
 from psutil.tests import check_net_address
@@ -795,6 +796,7 @@ class TestNetAPIs(PsutilTestCase):
             assert psutil.net_io_counters(pernic=True) == {}
             assert m.called
 
+    @pytest.mark.skipif(QEMU_USER, reason="QEMU user not supported")
     def test_net_if_addrs(self):
         nics = psutil.net_if_addrs()
         assert nics, nics
@@ -888,6 +890,7 @@ class TestNetAPIs(PsutilTestCase):
             else:
                 assert addr.address == '06-3d-29-00-00-00'
 
+    @pytest.mark.skipif(QEMU_USER, reason="QEMU user not supported")
     def test_net_if_stats(self):
         nics = psutil.net_if_stats()
         assert nics, nics

@@ -25,7 +25,10 @@ from psutil import POSIX
 from psutil import SUNOS
 from psutil.tests import AARCH64
 from psutil.tests import HAS_NET_IO_COUNTERS
+from psutil.tests import PPC64LE
 from psutil.tests import PYTHON_EXE
+from psutil.tests import QEMU_USER
+from psutil.tests import S390X
 from psutil.tests import PsutilTestCase
 from psutil.tests import pytest
 from psutil.tests import retry_on_failure
@@ -101,6 +104,9 @@ def ps_name(pid):
     if SUNOS:
         field = "comm"
     command = ps(field, pid).split()
+    if QEMU_USER:
+        assert "/bin/qemu-" in command[0]
+        return command[1]
     return command[0]
 
 
@@ -299,7 +305,9 @@ class TestProcess(PsutilTestCase):
     def test_cmdline(self):
         ps_cmdline = ps_args(self.pid)
         psutil_cmdline = " ".join(psutil.Process(self.pid).cmdline())
-        if AARCH64 and len(ps_cmdline) < len(psutil_cmdline):
+        if (AARCH64 or PPC64LE or S390X) and len(ps_cmdline) < len(
+            psutil_cmdline
+        ):
             assert psutil_cmdline.startswith(ps_cmdline)
         else:
             assert ps_cmdline == psutil_cmdline

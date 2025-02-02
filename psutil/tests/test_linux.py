@@ -32,7 +32,9 @@ from psutil.tests import HAS_CPU_FREQ
 from psutil.tests import HAS_GETLOADAVG
 from psutil.tests import HAS_RLIMIT
 from psutil.tests import PYPY
+from psutil.tests import QEMU_USER
 from psutil.tests import RISCV64
+from psutil.tests import S390X
 from psutil.tests import TOLERANCE_DISK_USAGE
 from psutil.tests import TOLERANCE_SYS_MEM
 from psutil.tests import PsutilTestCase
@@ -942,6 +944,7 @@ class TestLoadAvg(PsutilTestCase):
 
 
 @pytest.mark.skipif(not LINUX, reason="LINUX only")
+@pytest.mark.skipif(QEMU_USER and S390X, reason="endianness issue")
 class TestSystemNetIfAddrs(PsutilTestCase):
     def test_ips(self):
         for name, addrs in psutil.net_if_addrs().items():
@@ -982,6 +985,7 @@ class TestSystemNetIfAddrs(PsutilTestCase):
 
 
 @pytest.mark.skipif(not LINUX, reason="LINUX only")
+@pytest.mark.skipif(QEMU_USER, reason="QEMU user not supported")
 class TestSystemNetIfStats(PsutilTestCase):
     @pytest.mark.skipif(
         not shutil.which("ifconfig"), reason="ifconfig utility not available"
@@ -2236,6 +2240,7 @@ class TestProcessAgainstStatus(PsutilTestCase):
         value = self.read_status_file("Name:")
         assert self.proc.name() == value
 
+    @pytest.mark.skipif(QEMU_USER, reason="QEMU user not supported")
     def test_status(self):
         value = self.read_status_file("State:")
         value = value[value.find('(') + 1 : value.rfind(')')]

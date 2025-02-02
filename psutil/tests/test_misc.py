@@ -29,6 +29,9 @@ from psutil._common import parse_environ_block
 from psutil._common import supports_ipv6
 from psutil._common import wrap_numbers
 from psutil.tests import HAS_NET_IO_COUNTERS
+from psutil.tests import LIBC
+from psutil.tests import QEMU_USER
+from psutil.tests import S390X
 from psutil.tests import PsutilTestCase
 from psutil.tests import process_namespace
 from psutil.tests import pytest
@@ -269,6 +272,13 @@ class TestMisc(PsutilTestCase):
         for fun, name in ns.iter(ns.getters):
             if name in {"win_service_iter", "win_service_get"}:
                 continue
+            if QEMU_USER:
+                if name == "net_if_stats":
+                    # OSError: [Errno 38] ioctl(SIOCETHTOOL) not implemented
+                    continue
+                if S390X and LIBC != "glibc" and name == "net_if_addrs":
+                    # deadlock with QEMU on s390x musl libc
+                    continue
             with self.subTest(name=name):
                 try:
                     ret = fun()

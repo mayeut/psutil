@@ -49,6 +49,7 @@ from psutil.tests import MACOS_11PLUS
 from psutil.tests import PYPY
 from psutil.tests import PYTHON_EXE
 from psutil.tests import PYTHON_EXE_ENV
+from psutil.tests import QEMU_USER
 from psutil.tests import PsutilTestCase
 from psutil.tests import ThreadTask
 from psutil.tests import call_until
@@ -245,6 +246,7 @@ class TestProcess(PsutilTestCase):
             psutil.Process().cpu_percent()
             assert m.called
 
+    @pytest.mark.skipif(QEMU_USER, reason="QEMU user not supported")
     def test_cpu_times(self):
         times = psutil.Process().cpu_times()
         assert times.user >= 0.0, times
@@ -257,6 +259,7 @@ class TestProcess(PsutilTestCase):
         for name in times._fields:
             time.strftime("%H:%M:%S", time.localtime(getattr(times, name)))
 
+    @pytest.mark.skipif(QEMU_USER, reason="QEMU user not supported")
     def test_cpu_times_2(self):
         def waste_cpu():
             stop_at = os.times().user + 0.2
@@ -619,6 +622,8 @@ class TestProcess(PsutilTestCase):
                 continue
             if BSD and nt.path == "pvclock":
                 continue
+            if QEMU_USER and "/bin/qemu-" in nt.path:
+                continue
             assert os.path.isabs(nt.path), nt.path
 
             if POSIX:
@@ -685,6 +690,7 @@ class TestProcess(PsutilTestCase):
         assert not p.is_running()
         assert not p.is_running()
 
+    @pytest.mark.skipif(QEMU_USER, reason="QEMU user not supported")
     def test_exe(self):
         p = self.spawn_psproc()
         exe = p.exe()
@@ -737,6 +743,9 @@ class TestProcess(PsutilTestCase):
                 if pyexe != PYTHON_EXE:
                     assert ' '.join(p.cmdline()[1:]) == ' '.join(cmdline[1:])
                     return
+            if QEMU_USER:
+                assert ' '.join(p.cmdline()[2:]) == ' '.join(cmdline)
+                return
             assert ' '.join(p.cmdline()) == ' '.join(cmdline)
 
     @pytest.mark.skipif(PYPY, reason="broken on PYPY")
@@ -759,6 +768,8 @@ class TestProcess(PsutilTestCase):
                 assert p.cmdline()[1:] == cmdline
             except psutil.ZombieProcess:
                 raise pytest.skip("OPENBSD: process turned into zombie")
+        elif QEMU_USER:
+            assert p.cmdline()[3:] == cmdline
         else:
             ret = p.cmdline()[1:]
             if NETBSD and ret == []:
@@ -773,6 +784,7 @@ class TestProcess(PsutilTestCase):
         assert pyexe.startswith(name), (pyexe, name)
 
     @pytest.mark.skipif(PYPY, reason="unreliable on PYPY")
+    @pytest.mark.skipif(QEMU_USER, reason="unreliable on QEMU user")
     @retry_on_failure()
     def test_long_name(self):
         pyexe = create_py_exe(self.get_testfn(suffix=string.digits * 2))
@@ -804,6 +816,7 @@ class TestProcess(PsutilTestCase):
     # @pytest.mark.skipif(SUNOS, reason="broken on SUNOS")
     # @pytest.mark.skipif(AIX, reason="broken on AIX")
     # @pytest.mark.skipif(PYPY, reason="broken on PYPY")
+    # @pytest.mark.skipif(QEMU_USER, reason="broken on QEMU user")
     # def test_prog_w_funky_name(self):
     #     # Test that name(), exe() and cmdline() correctly handle programs
     #     # with funky chars such as spaces and ")", see:
@@ -911,6 +924,7 @@ class TestProcess(PsutilTestCase):
             except psutil.AccessDenied:
                 pass
 
+    @pytest.mark.skipif(QEMU_USER, reason="QEMU user not supported")
     def test_status(self):
         p = psutil.Process()
         assert p.status() == psutil.STATUS_RUNNING
@@ -1146,6 +1160,7 @@ class TestProcess(PsutilTestCase):
         assert grandchild.parent() == child
         assert child.parent() == parent
 
+    @pytest.mark.skipif(QEMU_USER, reason="QEMU user not supported")
     @retry_on_failure()
     def test_parents(self):
         parent = psutil.Process()

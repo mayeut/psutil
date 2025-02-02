@@ -29,8 +29,11 @@ from psutil.tests import CI_TESTING
 from psutil.tests import COVERAGE
 from psutil.tests import HAS_NET_CONNECTIONS_UNIX
 from psutil.tests import HERE
+from psutil.tests import LIBC
 from psutil.tests import PYTHON_EXE
 from psutil.tests import PYTHON_EXE_ENV
+from psutil.tests import QEMU_USER
+from psutil.tests import S390X
 from psutil.tests import PsutilTestCase
 from psutil.tests import TestMemoryLeak
 from psutil.tests import bind_socket
@@ -565,6 +568,10 @@ class TestTestingUtils(PsutilTestCase):
         fun = next(x for x in ns.iter(ns.getters) if x[1] == 'ppid')[0]
         assert fun() == p.ppid()
 
+    @pytest.mark.skipif(
+        QEMU_USER and S390X and LIBC != "glibc",
+        reason="deadlock with QEMU on s390x musl libc",
+    )
     def test_system_namespace(self):
         ns = system_namespace()
         fun = next(x for x in ns.iter(ns.getters) if x[1] == 'net_if_addrs')[0]
