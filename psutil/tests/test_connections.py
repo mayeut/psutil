@@ -160,7 +160,7 @@ class TestUnconnectedSockets(ConnectionTestCase):
             assert conn.status == psutil.CONN_LISTEN
 
     @pytest.mark.skipif(QEMU_USER and S390X, reason="endianness issue")
-    @pytest.mark.skipif(not supports_ipv6(), "IPv6 not supported")
+    @pytest.mark.skipif(not supports_ipv6(), reason="IPv6 not supported")
     def test_tcp_v6(self):
         addr = ("::1", 0)
         with closing(bind_socket(AF_INET6, SOCK_STREAM, addr=addr)) as sock:
