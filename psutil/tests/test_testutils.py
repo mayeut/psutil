@@ -571,7 +571,7 @@ class TestTestingUtils(PsutilTestCase):
 
     @pytest.mark.skipif(
         QEMU_USER and S390X and LIBC != "glibc",
-        "deadlock with QEMU on s390x musl libc",
+        reason="deadlock with QEMU on s390x musl libc",
     )
     def test_system_namespace(self):
         ns = system_namespace()

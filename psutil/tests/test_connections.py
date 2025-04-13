@@ -151,7 +151,7 @@ class TestUnconnectedSockets(ConnectionTestCase):
             self.compare_procsys_connections(os.getpid(), cons, kind='all')
         return conn
 
-    @pytest.mark.skipif(QEMU_USER and S390X, "endianness issue")
+    @pytest.mark.skipif(QEMU_USER and S390X, reason="endianness issue")
     def test_tcp_v4(self):
         addr = ("127.0.0.1", 0)
         with closing(bind_socket(AF_INET, SOCK_STREAM, addr=addr)) as sock:
@@ -159,7 +159,7 @@ class TestUnconnectedSockets(ConnectionTestCase):
             assert conn.raddr == ()
             assert conn.status == psutil.CONN_LISTEN
 
-    @pytest.mark.skipif(QEMU_USER and S390X, "endianness issue")
+    @pytest.mark.skipif(QEMU_USER and S390X, reason="endianness issue")
     @pytest.mark.skipif(not supports_ipv6(), "IPv6 not supported")
     def test_tcp_v6(self):
         addr = ("::1", 0)
@@ -168,7 +168,7 @@ class TestUnconnectedSockets(ConnectionTestCase):
             assert conn.raddr == ()
             assert conn.status == psutil.CONN_LISTEN
 
-    @pytest.mark.skipif(QEMU_USER and S390X, "endianness issue")
+    @pytest.mark.skipif(QEMU_USER and S390X, reason="endianness issue")
     def test_udp_v4(self):
         addr = ("127.0.0.1", 0)
         with closing(bind_socket(AF_INET, SOCK_DGRAM, addr=addr)) as sock:
@@ -176,8 +176,8 @@ class TestUnconnectedSockets(ConnectionTestCase):
             assert conn.raddr == ()
             assert conn.status == psutil.CONN_NONE
 
-    @pytest.mark.skipif(QEMU_USER and S390X, "endianness issue")
-    @pytest.mark.skipif(not supports_ipv6(), "IPv6 not supported")
+    @pytest.mark.skipif(QEMU_USER and S390X, reason="endianness issue")
+    @pytest.mark.skipif(not supports_ipv6(), reason="IPv6 not supported")
     def test_udp_v6(self):
         addr = ("::1", 0)
         with closing(bind_socket(AF_INET6, SOCK_DGRAM, addr=addr)) as sock:
@@ -290,7 +290,7 @@ class TestFilters(ConnectionTestCase):
                     [SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET],
                 )
 
-    @pytest.mark.skipif(QEMU_USER and S390X, "endianness issue")
+    @pytest.mark.skipif(QEMU_USER and S390X, reason="endianness issue")
     @skip_on_access_denied(only_if=MACOS)
     def test_combos(self):
         reap_children()

@@ -256,7 +256,7 @@ class TestSystemAPITypes(PsutilTestCase):
 
     @pytest.mark.skipif(
         QEMU_USER and S390X and LIBC != "glibc",
-        "deadlock with QEMU on s390x musl libc",
+        reason="deadlock with QEMU on s390x musl libc",
     )
     def test_net_if_addrs(self):
         # Duplicate of test_system.py. Keep it anyway.

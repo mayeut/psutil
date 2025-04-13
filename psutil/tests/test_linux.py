@@ -32,7 +32,6 @@ from psutil.tests import HAS_CPU_FREQ
 from psutil.tests import HAS_GETLOADAVG
 from psutil.tests import HAS_RLIMIT
 from psutil.tests import PYPY
-from psutil.tests import PYTEST_PARALLEL
 from psutil.tests import QEMU_USER
 from psutil.tests import S390X
 from psutil.tests import TOLERANCE_DISK_USAGE
@@ -943,8 +942,8 @@ class TestLoadAvg(PsutilTestCase):
 # =====================================================================
 
 
-@pytest.mark.skipif(not LINUX, "LINUX only")
-@pytest.mark.skipif(QEMU_USER and S390X, "endianness issue")
+@pytest.mark.skipif(not LINUX, reason="LINUX only")
+@pytest.mark.skipif(QEMU_USER and S390X, reason="endianness issue")
 class TestSystemNetIfAddrs(PsutilTestCase):
     def test_ips(self):
         for name, addrs in psutil.net_if_addrs().items():
