@@ -219,14 +219,18 @@ spaces_indent_inline_array = 4
 trailing_comma_inline_array = true
 
 [tool.cibuildwheel]
+archs = ["auto32", "auto64"]
 skip = [
     "*-musllinux*",
+    "cp3??t-*",  # Don't build freethreaded
     "cp3{7,8,9,10,11,12}-*linux_{ppc64le,s390x}",  # Only test cp36/cp313 on qemu tested architectures
-    "pp*",
 ]
 test-extras = ["test"]
 test-command = "make -C {project} PYTHON=python PSUTIL_SCRIPTS_DIR=\"{project}/scripts\" test-cibuildwheel"
-test-skip = "cp39-win_arm64"  # pywin32 is not available on cp39 ARM64
+# use older images for compatibility with old distros
+manylinux-x86_64-image = "manylinux2014"
+manylinux-i686-image = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
 
 [tool.cibuildwheel.macos]
 archs = ["arm64", "x86_64"]
