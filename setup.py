@@ -153,16 +153,20 @@ macros.append(('PSUTIL_VERSION', int(VERSION.replace('.', ''))))
 
 # Py_LIMITED_API lets us create a single wheel which works with multiple
 # python versions, including unreleased ones.
-if setuptools and CP36_PLUS and (MACOS or LINUX) and not Py_GIL_DISABLED:
+# PyErr_SetFromWindowsErr / PyErr_SetFromWindowsErrWithFilename are
+# part of the stable API/ABI starting with CPython 3.7
+ABI3_COMPATIBLE = (
+    CP36_PLUS
+    and (MACOS or LINUX or (CP37_PLUS and WINDOWS))
+    and not Py_GIL_DISABLED
+)
+if setuptools and ABI3_COMPATIBLE:
     py_limited_api = {"py_limited_api": True}
-    options = {"bdist_wheel": {"py_limited_api": "cp36"}}
-    macros.append(('Py_LIMITED_API', '0x03060000'))
-elif setuptools and CP37_PLUS and WINDOWS and not Py_GIL_DISABLED:
-    # PyErr_SetFromWindowsErr / PyErr_SetFromWindowsErrWithFilename are
-    # part of the stable API/ABI starting with CPython 3.7
-    py_limited_api = {"py_limited_api": True}
-    options = {"bdist_wheel": {"py_limited_api": "cp37"}}
-    macros.append(('Py_LIMITED_API', '0x03070000'))
+    minor = 7 if WINDOWS else 6
+    if "CIBUILDWHEEL" in os.environ:
+        minor = sys.version_info[1]
+    options = {"bdist_wheel": {"py_limited_api": "cp3{}".format(minor)}}
+    macros.append(('Py_LIMITED_API', '0x03{:02x}0000'.format(minor)))
 else:
     py_limited_api = {}
     options = {}
