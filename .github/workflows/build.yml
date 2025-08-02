@@ -20,7 +20,7 @@ jobs:
   tests:
     name: "tests, ${{ matrix.os }}, ${{ matrix.arch }}"
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -49,23 +49,18 @@ jobs:
         with:
           python-version: 3.11
 
+      - name: Create EOL wheels + run tests
+        uses: pypa/cibuildwheel@v2.23.3
+        env:
+          CIBW_ARCHS: "${{ matrix.arch }}"
+          CIBW_SKIP: "cp3??t-* *-musllinux* pp*"
+
       - name: Create wheels + run tests
         uses: pypa/cibuildwheel@v3.1.3
         env:
           CIBW_ARCHS: "${{ matrix.arch }}"
           CIBW_ENABLE: "${{ startsWith(github.ref, 'refs/tags/') && '' || 'cpython-prerelease' }}"
-
-      - name: Run Python 3.6/3.7 tests
-        if: runner.os == 'Linux'
-        run: |
-          docker run -i -e GITHUB_ACTIONS -v $(pwd):/psutil quay.io/pypa/manylinux2014_${{ matrix.arch }}:2025.05.03-1 << EOF
-          set -euxo pipefail
-          for PYTHON in cpython3.6 cpython3.7; do
-            WHL=\$(find /psutil/wheelhouse -name '*.whl')
-            \${PYTHON} -m pip install "\${WHL}[test]"
-            make -C /psutil PYTHON=\${PYTHON} PSUTIL_SCRIPTS_DIR="/psutil/scripts" test-cibuildwheel
-          done
-          EOF
+          CIBW_SKIP: "cp3{6,7,8,9}-* cp3??t-* *-musllinux*" # skip EOL + skip list
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
