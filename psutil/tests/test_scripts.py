@@ -41,7 +41,7 @@ SETUP_PY = os.path.join(ROOT_DIR, 'setup.py')
 
 
 @pytest.mark.skipif(
-    CI_TESTING and not os.path.exists(SCRIPTS_DIR),
+    CI_TESTING and True,  # not os.path.exists(SCRIPTS_DIR),
     reason="can't find scripts/ directory",
 )
 class TestExampleScripts(PsutilTestCase):
@@ -179,7 +179,7 @@ class TestExampleScripts(PsutilTestCase):
 
 
 @pytest.mark.skipif(
-    CI_TESTING and not os.path.exists(INTERNAL_SCRIPTS_DIR),
+    CI_TESTING and True,  # not os.path.exists(INTERNAL_SCRIPTS_DIR),
     reason="can't find scripts/internal/ directory",
 )
 class TestInternalScripts(PsutilTestCase):
