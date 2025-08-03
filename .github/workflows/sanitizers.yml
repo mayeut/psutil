@@ -1,0 +1,43 @@
+on: [push, pull_request]
+name: sanitizers
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.sha || '' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  clang_ASAN_UBSAN:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up pyenv
+        run: |
+          git clone https://github.com/pyenv/pyenv.git "$HOME/.pyenv"
+          PYENV_ROOT="$HOME/.pyenv"
+          PYENV_BIN="$PYENV_ROOT/bin"
+          PYENV_SHIMS="$PYENV_ROOT/shims"
+          echo "$PYENV_BIN" >> $GITHUB_PATH
+          echo "$PYENV_SHIMS" >> $GITHUB_PATH
+          echo "PYENV_ROOT=$PYENV_ROOT" >> $GITHUB_ENV
+      - name: Check pyenv is working
+        run: pyenv --version
+      - name: Set up LLVM
+        run: |
+          brew install llvm@19
+          LLVM_PREFIX=$(brew --prefix llvm@19)
+          echo CC="$LLVM_PREFIX/bin/clang" >> $GITHUB_ENV
+          echo CXX="$LLVM_PREFIX/bin/clang++" >> $GITHUB_ENV
+          echo LDFLAGS="-L$LLVM_PREFIX/lib" >> $GITHUB_ENV
+          echo CPPFLAGS="-I$LLVM_PREFIX/include" >> $GITHUB_ENV
+      - name: Build Python with address sanitizer
+        run: |
+          CONFIGURE_OPTS="--with-address-sanitizer" pyenv install 3.13
+          pyenv global 3.13
+      - name: Build & Test
+        run: make test-ci
+        env:
+          ASAN_OPTIONS: "detect_leaks=0:symbolize=1:allocator_may_return_null=1"
+          UBSAN_OPTIONS: "halt_on_error=1"
+          CFLAGS: "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer"
