@@ -38,7 +38,7 @@ jobs:
       - name: Build
         run: python -m pip install -e .[test]
         env:
-          CFLAGS: "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer"
+          CFLAGS: "-O1 -g -fsanitize=address,undefined,bounds -fno-omit-frame-pointer"
       - name: Test
         run: |
           python -c "from psutil.tests import print_sysinfo; print_sysinfo()"
