@@ -46,6 +46,9 @@ def main():
             # https://learn.microsoft.com/en-us/answers/questions/1320388/in-windows-11-version-22h2-there-it-shows-(failed
             # https://github.com/giampaolo/psutil/issues/2383
             continue
+        if service.name() == "McmSvc":
+            # looks like the same kind of issue as the previous one
+            continue
         info = service.as_dict()
         print(f"{info['name']!r} ({info['display_name']!r})")
         s = "status: {}, start: {}, username: {}, pid: {}".format(

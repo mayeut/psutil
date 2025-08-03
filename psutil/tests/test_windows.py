@@ -890,6 +890,9 @@ class TestServices(PsutilTestCase):
                 # https://learn.microsoft.com/en-us/answers/questions/1320388/in-windows-11-version-22h2-there-it-shows-(failed
                 # https://github.com/giampaolo/psutil/issues/2383
                 continue
+            if serv.name() == "McmSvc":
+                # looks like the same kind of issue as the previous one
+                continue
             data = serv.as_dict()
             assert isinstance(data['name'], str)
             assert data['name'].strip()
