@@ -41,6 +41,7 @@ jobs:
           CFLAGS: "-O1 -g -fsanitize=address,undefined,bounds -fno-omit-frame-pointer"
       - name: Test
         run: |
+          export PSUTIL_SCRIPTS_DIR="$(pwd)/scripts"
           mkdir .tests
           cd .tests
           python -c "from psutil.tests import print_sysinfo; print_sysinfo()"
