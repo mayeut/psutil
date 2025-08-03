@@ -36,7 +36,7 @@ jobs:
           CONFIGURE_OPTS="--with-pydebug --without-pymalloc --with-address-sanitizer" pyenv install 3.13
           pyenv global 3.13
       - name: Build
-        run: python -m pip -vv install -e .[test]
+        run: python -m pip -v install -e .[test]
         env:
           CFLAGS: "-O1 -g -fsanitize=address,undefined,bounds -fno-omit-frame-pointer"
       - name: Test
