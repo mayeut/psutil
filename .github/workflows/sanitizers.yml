@@ -33,7 +33,7 @@ jobs:
           echo CPPFLAGS="-I$LLVM_PREFIX/include" >> $GITHUB_ENV
       - name: Build Python with address sanitizer
         run: |
-          CONFIGURE_OPTS="--with-address-sanitizer" pyenv install 3.13
+          CONFIGURE_OPTS="--with-pydebug --without-pymalloc --with-address-sanitizer" pyenv install 3.13
           pyenv global 3.13
       - name: Build & Test
         run: |
